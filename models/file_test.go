@@ -23,10 +23,10 @@ func init() {
     if err != nil {
         log.Fatal(err)
     }
-    if err := engine.DropTables(File{}, Tag{}, FileTag{}); err != nil {
+    if err := engine.DropTables(File{}, Tag{}, Dataset{}); err != nil {
         log.Fatal(err)
     }
-    if err := engine.Sync(File{}, Tag{}, FileTag{}); err != nil {
+    if err := engine.Sync(File{}, Tag{}, Dataset{}); err != nil {
         log.Fatal(err)
     }
 }
@@ -44,13 +44,13 @@ func TestInsertFile(t *testing.T) {
     }
 }
 
-func TestFileTag(t *testing.T) {
-    var fileTag = &FileTag{FileId: 1, TagId: 1}
-    if _, err := engine.Insert(fileTag); err != nil {
+func TestDataset(t *testing.T) {
+    var dataset = &Dataset{FileId: 1, TagId: 1}
+    if _, err := engine.Insert(dataset); err != nil {
         t.Fatal(err)
     }
-    Convey("FileTag: unique(file_tag)", t, func() {
-        _, err := engine.Insert(fileTag)
+    Convey("Dataset: unique(file_tag)", t, func() {
+        _, err := engine.Insert(dataset)
         So(err, ShouldNotBeNil)
     })
 }

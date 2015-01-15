@@ -6,7 +6,7 @@ import (
 )
 
 func Init(engine *xorm.Engine) {
-    if err := engine.Sync(File{}, Tag{}, FileTag{}); err != nil {
+    if err := engine.Sync(File{}, Tag{}, Dataset{}); err != nil {
         log.Fatal(err)
     }
 }

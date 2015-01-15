@@ -17,9 +17,10 @@ type Tag struct {
 }
 
 
-type FileTag struct {
+type Dataset struct {
     Id        int       `xorm:"pk autoincr"`
     TagId     int       `xorm:"unique(tag_file)"`
     FileId    int       `xorm:"unique(tag_file)"`
+    Type      int       `xorm:"tinyint(1) default(0)"`
     CreatedAt time.Time `xorm:"created"`
 }

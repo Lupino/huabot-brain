@@ -69,10 +69,10 @@ func api(mart *martini.ClassicMartini, engine *xorm.Engine) {
             }
         }
 
-        var fileTag = &models.FileTag{FileId: file.Id, TagId: tag.Id}
-        has, _ = engine.Get(fileTag)
+        var dataset = &models.Dataset{FileId: file.Id, TagId: tag.Id}
+        has, _ = engine.Get(dataset)
         if !has {
-            if _, err := engine.Insert(fileTag); err != nil {
+            if _, err := engine.Insert(dataset); err != nil {
                 log.Printf("Error: %s\n", err)
                 r.JSON(http.StatusInternalServerError, map[string]interface{}{
                     "err": "Save file tag: " + up.Tag + " error: " + err.Error()})
