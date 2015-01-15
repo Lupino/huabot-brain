@@ -4,7 +4,9 @@ import (
     // _ "github.com/go-sql-driver/mysql"
     _ "github.com/mattn/go-sqlite3"
     "github.com/go-xorm/xorm"
+    . "github.com/smartystreets/goconvey/convey"
     "testing"
+    "strconv"
     "log"
     "fmt"
 )
@@ -32,17 +34,24 @@ func init() {
 func TestInsertFile(t *testing.T) {
     for i := range make([]int, 5) {
         var key = fmt.Sprintf("key %d", i)
-        if _, err := engine.Insert(&File{Key: key}); err != nil {
+        var file = &File{Key: key}
+        if _, err := engine.Insert(file); err != nil {
             t.Fatal(err)
         }
+        Convey("File: " + key + "'s Id should equal " + strconv.Itoa(i + 1), t, func() {
+            So(file.Id, ShouldEqual, i + 1)
+        })
     }
 }
 
 func TestFileTag(t *testing.T) {
-    if _, err := engine.Insert(&FileTag{FileId: 1, TagId: 1}); err != nil {
+    var fileTag = &FileTag{FileId: 1, TagId: 1}
+    if _, err := engine.Insert(fileTag); err != nil {
         t.Fatal(err)
     }
-    if _, err := engine.Insert(&FileTag{FileId: 1, TagId: 1}); err == nil {
-        t.Fatal("unique key: file_tag fail")
-    }
+    Convey("FileTag: unique(file_tag)", t, func() {
+        _, err := engine.Insert(fileTag)
+        So(err, ShouldNotBeNil)
+    })
 }
+
