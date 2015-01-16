@@ -18,7 +18,7 @@ var engine *xorm.Engine
 
 func init() {
     var err error
-    engine, err = xorm.NewEngine("sqlite3", "file_test.db")
+    engine, err = xorm.NewEngine("sqlite3", "dataset_test.db")
     // engine, err = xorm.NewEngine("mysql", "root:@/collect?charset=utf8")
     if err != nil {
         log.Fatal(err)
