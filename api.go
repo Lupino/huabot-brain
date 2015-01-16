@@ -18,9 +18,26 @@ type TagForm struct {
     Tag  string                `form:"tag"  binding:"required"`
 }
 
+type DataTypeForm struct {
+    DataType uint              `form:"data_type"`
+}
+
+func (dt DataTypeForm) Validate(errors binding.Errors, req *http.Request) (binding.Errors) {
+    if dt.DataType > 2 {
+        errors = append(errors, binding.Error{
+            FieldNames: []string{"data_type"},
+            Classification: "TypeError",
+            Message: "data_type must on [0 1 2] or nil",
+        })
+    }
+    return errors
+}
+
 type DatasetForm struct {
     FileForm
     TagForm
+    DataTypeForm
+
 }
 
 func api(mart *martini.ClassicMartini) {
@@ -38,7 +55,7 @@ func api(mart *martini.ClassicMartini) {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        if dataset, err = saveDataset(file, tag, 0); err != nil {
+        if dataset, err = saveDataset(file, tag, form.DataType); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
