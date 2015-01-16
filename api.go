@@ -44,4 +44,26 @@ func api(mart *martini.ClassicMartini) {
 
         r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
     })
+
+    mart.Post(API + "/upload", binding.Bind(FileForm{}), func(form FileForm, r render.Render) {
+        var err error
+        var file *models.File
+
+        if file, err = uploadFile(form.File); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+        }
+
+        r.JSON(http.StatusOK, map[string]*models.File{"file": file})
+    })
+
+    mart.Post(API + "/tags", binding.Bind(TagForm{}), func(form TagForm, r render.Render) {
+        var err error
+        var tag *models.Tag
+
+        if tag, err = saveTag(form.Tag); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+        }
+
+        r.JSON(http.StatusOK, map[string]*models.Tag{"file": tag})
+    })
 }
