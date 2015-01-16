@@ -3,11 +3,12 @@ package main
 import (
     "github.com/go-martini/martini"
     "github.com/martini-contrib/render"
-    _ "github.com/mattn/go-sqlite3"
-    "github.com/Lupino/collect/models"
-    "github.com/go-xorm/xorm"
-    "log"
+    "flag"
 )
+
+func init() {
+    flag.Parse()
+}
 
 func main() {
     mart := martini.Classic()
@@ -21,15 +22,7 @@ func main() {
         HTMLContentType: "application/xhtml+xml",
     }))
 
-    engine, err := xorm.NewEngine("sqlite3", "collect.db")
-
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    models.Init(engine)
-
-    api(mart, engine)
+    api(mart)
 
     mart.Run()
 }

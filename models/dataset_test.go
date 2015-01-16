@@ -14,7 +14,7 @@ import (
 import (
 )
 
-var engine *xorm.Engine
+// var engine_test *xorm.Engine
 
 func init() {
     var err error
