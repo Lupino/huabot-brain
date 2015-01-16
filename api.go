@@ -152,4 +152,64 @@ func api(mart *martini.ClassicMartini) {
 
         r.JSON(http.StatusOK, map[string]*models.Tag{"file": tag})
     })
+
+    mart.Post(API + "/tags/(?P<tag_id>\\d+)/?", binding.Bind(TagForm{}), func(form TagForm, params martini.Params, r render.Render) {
+        tagId, _ := strconv.Atoi(params["tag_id"])
+        var tag = new(models.Tag)
+        if has, err := engine.Id(tagId).Get(tag); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        } else if has {
+            if tag.Name != form.Tag {
+                tag.Name = form.Tag
+                if _, err := engine.Id(tagId).Update(tag); err != nil {
+                    r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+                    return
+                }
+            }
+            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+        } else {
+            r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
+        }
+    })
+
+    mart.Get(API + "/tags/(?P<tag_id>\\d+)/?", func(params martini.Params, r render.Render) {
+        tagId, _ := strconv.Atoi(params["tag_id"])
+        var tag = new(models.Tag)
+        if has, err := engine.Id(tagId).Get(tag); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        } else if has {
+            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+        } else {
+            r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
+        }
+    })
+
+    mart.Get(API + "/tags/?", func(req *http.Request, r render.Render) {
+        var qs = req.URL.Query()
+        var err error
+        var max, limit int
+        if max, err = strconv.Atoi(qs.Get("max")); err != nil {
+            max = -1
+        }
+
+        if limit, err = strconv.Atoi(qs.Get("limit")); err != nil {
+            limit = 10
+        }
+
+        if limit > 100 {
+            limit = 100
+        }
+
+        var tags = make([]models.Tag, 0)
+        var q = engine.Desc("id")
+        if max > -1 {
+            q = q.Where("id < ?", max)
+        }
+        q = q.Limit(limit)
+        if err = q.Find(&tags); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        }
+
+        r.JSON(http.StatusOK, map[string][]models.Tag{"tags": tags})
+    })
 }
