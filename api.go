@@ -11,11 +11,11 @@ import (
 
 
 type FileForm struct {
-    File *multipart.FileHeader `form:"file"`
+    File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
 type TagForm struct {
-    Tag  string                `form:"tag"`
+    Tag  string                `form:"tag"  binding:"required"`
 }
 
 type DatasetForm struct {
