@@ -7,12 +7,7 @@ import (
     "github.com/Lupino/collect/models"
     "github.com/go-xorm/xorm"
     "mime/multipart"
-    "crypto/sha1"
-    "io"
-    "os"
-    "encoding/hex"
     "net/http"
-    "log"
 )
 
 
@@ -31,62 +26,23 @@ type DatasetForm struct {
 
 func api(mart *martini.ClassicMartini, engine *xorm.Engine) {
     mart.Post(API + "/dataset", binding.Bind(DatasetForm{}), func(form DatasetForm, r render.Render) {
-        realFile, err := form.File.Open()
-        if err != nil {
-            log.Printf("Error: %s\n", err)
-            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Upload file fail"})
-            return
-        }
-        defer realFile.Close()
-        hasher := sha1.New()
-        io.Copy(hasher, realFile)
-        fileKey := hex.EncodeToString(hasher.Sum(nil))
-        var file = &models.File{Key: fileKey}
-        has, _ := engine.Get(file)
-        if !has {
-            dst, err := os.Create(UPLOADPATH + fileKey)
-            defer dst.Close()
-            if err != nil {
-                log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Upload file fail"})
-                return
-            }
-            realFile.Seek(0, 0)
-            _, err = io.Copy(dst, realFile)
-            if err != nil {
-                log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Upload file fail"})
-                return
-            }
+        var err error
+        var file *models.File
+        var tag *models.Tag
+        var dataset *models.Dataset
 
-            if _, err := engine.Insert(file); err != nil {
-                log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Upload file fail"})
-                return
-            }
+        if file, err = uploadFile(form.File, engine); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        var tag = &models.Tag{Name: form.Tag}
-        has, _ = engine.Get(tag)
-        if !has {
-            if _, err := engine.Insert(tag); err != nil {
-                log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Save tag " + form.Tag + " fail"})
-                return
-            }
+        if tag, err = saveTag(form.Tag, engine); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        var dataset = &models.Dataset{FileId: file.Id, TagId: tag.Id}
-        has, _ = engine.Get(dataset)
-        if !has {
-            if _, err := engine.Insert(dataset); err != nil {
-                log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{
-                    "err": "Save file tag: " + form.Tag + " error: " + err.Error()})
-                return
-            }
+        if dataset, err = saveDataset(file, tag, 0, engine); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        r.JSON(http.StatusOK, map[string]string{"msg": "ok"})
+        r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
     })
 }
