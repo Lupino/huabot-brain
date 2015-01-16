@@ -16,15 +16,22 @@ import (
 )
 
 
-type UploadForm struct {
+type FileForm struct {
     File *multipart.FileHeader `form:"file"`
+}
+
+type TagForm struct {
     Tag  string                `form:"tag"`
 }
 
+type DatasetForm struct {
+    FileForm
+    TagForm
+}
 
 func api(mart *martini.ClassicMartini, engine *xorm.Engine) {
-    mart.Post(API + "/upload", binding.Bind(UploadForm{}), func(up UploadForm, r render.Render) {
-        realFile, err := up.File.Open()
+    mart.Post(API + "/dataset", binding.Bind(DatasetForm{}), func(form DatasetForm, r render.Render) {
+        realFile, err := form.File.Open()
         if err != nil {
             log.Printf("Error: %s\n", err)
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Upload file fail"})
@@ -59,12 +66,12 @@ func api(mart *martini.ClassicMartini, engine *xorm.Engine) {
             }
         }
 
-        var tag = &models.Tag{Name: up.Tag}
+        var tag = &models.Tag{Name: form.Tag}
         has, _ = engine.Get(tag)
         if !has {
             if _, err := engine.Insert(tag); err != nil {
                 log.Printf("Error: %s\n", err)
-                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Save tag " + up.Tag + " fail"})
+                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": "Save tag " + form.Tag + " fail"})
                 return
             }
         }
@@ -75,7 +82,7 @@ func api(mart *martini.ClassicMartini, engine *xorm.Engine) {
             if _, err := engine.Insert(dataset); err != nil {
                 log.Printf("Error: %s\n", err)
                 r.JSON(http.StatusInternalServerError, map[string]interface{}{
-                    "err": "Save file tag: " + up.Tag + " error: " + err.Error()})
+                    "err": "Save file tag: " + form.Tag + " error: " + err.Error()})
                 return
             }
         }
