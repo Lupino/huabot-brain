@@ -34,14 +34,14 @@ func (dataset *Dataset) FillObject() (err error) {
     if has, err = engine.Get(tag); err != nil {
         return
     } else if has {
-        Dataset.Tag = tag
+        dataset.Tag = tag
     }
 
     var file = &File{Id: dataset.FileId}
     if has, err = engine.Get(file); err != nil {
         return
     } else if has {
-        Dataset.File = file
+        dataset.File = file
     }
 
     return
