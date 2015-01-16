@@ -4,6 +4,12 @@ import (
     "time"
 )
 
+const (
+    CANDIDATE uint = 0
+    TRAIN     uint = 1
+    VAL       uint = 2
+)
+
 type File struct {
     Id        int       `xorm:"pk autoincr"                 json:"file_id,omitempty"`
     Key       string    `xorm:"varchar(128) notnull unique" json:"key,omitempty"`
@@ -23,7 +29,7 @@ type Dataset struct {
     Tag       *Tag      `xorm:"-"                     json:"tag,omitempty"`
     FileId    int       `xorm:"unique(tag_file)"      json:"file_id,omitempty"`
     File      *File     `xorm:"-"                     json:"file,omitempty"`
-    DataType  int       `xorm:"tinyint(1) default(0)" json:"data_type,omitempty"`
+    DataType  uint      `xorm:"tinyint(1) default(0)" json:"data_type,omitempty"`
     CreatedAt time.Time `xorm:"created"               json:"created_at,omitempty"`
 }
 

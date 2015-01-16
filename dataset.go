@@ -51,7 +51,7 @@ func saveTag(realTag string) (tag *models.Tag, err error) {
     return
 }
 
-func saveDataset(file *models.File, tag *models.Tag, dataType int) (dataset *models.Dataset, err error) {
+func saveDataset(file *models.File, tag *models.Tag, dataType uint) (dataset *models.Dataset, err error) {
     dataset = &models.Dataset{FileId: file.Id, TagId: tag.Id}
     var engine = models.GetEngine()
     has, _ := engine.Get(dataset)
