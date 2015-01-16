@@ -24,7 +24,7 @@ type DatasetForm struct {
 }
 
 func api(mart *martini.ClassicMartini) {
-    mart.Post(API + "/dataset", binding.Bind(DatasetForm{}), func(form DatasetForm, r render.Render) {
+    mart.Post(API + "/datasets", binding.Bind(DatasetForm{}), func(form DatasetForm, r render.Render) {
         var err error
         var file *models.File
         var tag *models.Tag
