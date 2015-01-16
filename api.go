@@ -97,6 +97,16 @@ func api(mart *martini.ClassicMartini) {
         }
     })
 
+    mart.Delete(API + "/datasets/(?P<dataset_id>\\d+)/?", func(params martini.Params, r render.Render) {
+        datasetId, _ := strconv.Atoi(params["dataset_id"])
+        var dataset = new(models.Dataset)
+        if _, err := engine.Id(datasetId).Delete(dataset); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        } else {
+            r.JSON(http.StatusOK, map[string]string{})
+        }
+    })
+
     mart.Get(API + "/datasets/?", func(req *http.Request, r render.Render) {
         var qs = req.URL.Query()
         var err error
