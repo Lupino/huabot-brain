@@ -2,13 +2,18 @@ package main
 
 import (
     "github.com/Lupino/collect/models"
+    "github.com/Lupino/collect/caffe"
     "mime/multipart"
     "crypto/sha1"
     "io"
     "os"
     "encoding/hex"
     "fmt"
+    "sync"
 )
+
+var trainLocker = new(sync.Mutex)
+var onTraining = false
 
 func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     var source multipart.File
@@ -92,8 +97,39 @@ func exportToFile(file *os.File, dataType uint) (err error) {
     err = engine.Where("data_type=?", dataType).Iterate(new(models.Dataset), func(i int, bean interface{}) error {
         dataset := bean.(*models.Dataset)
         dataset.FillObject()
-        fmt.Fprintf(file, "%s%s %d\n", UPLOADPATH, dataset.File.Key, dataset.TagId)
+        fmt.Fprintf(file, "%s %d\n", dataset.File.Key, dataset.TagId)
         return nil
     })
     return
+}
+
+func caffeTrain() (err error) {
+    if onTraining {
+        return
+    }
+
+    onTraining = true
+    trainLocker.Lock()
+    defer (func() {
+        onTraining = false
+        trainLocker.Unlock()
+    })()
+
+    if err = exportDataset(); err != nil {
+        return
+    }
+
+    if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
+        return
+    }
+
+    if err = caffe.ConvertImageset("--resize_height=256", "--resize_width=256", "--shuffle", UPLOADPATH, VAL_FILE, VAL_LMDB); err != nil {
+        return
+    }
+
+    if err = caffe.ComputeImageMean(TRAIN_LMDB, MEAN_FILE); err != nil {
+        return
+    }
+
+    return caffe.Train(SOLVER_FILE)
 }
