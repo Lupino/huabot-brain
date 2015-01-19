@@ -119,6 +119,10 @@ func caffeTrain() (err error) {
         return
     }
 
+    os.RemoveAll(TRAIN_LMDB)
+    os.RemoveAll(VAL_LMDB)
+
+
     if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
         return
     }
