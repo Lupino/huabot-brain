@@ -8,6 +8,7 @@ import (
     "mime/multipart"
     "strconv"
     "net/http"
+    "log"
 )
 
 
@@ -221,5 +222,26 @@ func api(mart *martini.ClassicMartini) {
         }
 
         r.JSON(http.StatusOK, map[string][]models.Tag{"tags": tags})
+    })
+
+    mart.Post(API + "/train/?", func(r render.Render) {
+        if !onTraining {
+            go (func() {
+                if err := caffeTrain(); err != nil {
+                    log.Printf("CaffeTrainError: %s\n", err.Error())
+                }
+            })()
+
+        }
+        r.JSON(http.StatusOK, map[string]string{"msg": "on training"})
+        return
+    })
+    mart.Get(API + "/train/?", func(r render.Render) {
+        var msg = "no train"
+        if onTraining {
+            msg = "on training"
+        }
+        r.JSON(http.StatusOK, map[string]string{"msg": msg})
+        return
     })
 }
