@@ -7,6 +7,7 @@ import (
     "io"
     "os"
     "encoding/hex"
+    "fmt"
 )
 
 func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
@@ -63,5 +64,36 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint) (dataset *mo
     }
     dataset.File = file
     dataset.Tag = tag
+    return
+}
+
+func exportDataset() (err error) {
+
+    var trainFile, valFile *os.File
+    if trainFile, err = os.Create(TRAIN_FILE); err != nil {
+        return
+    }
+    defer trainFile.Close()
+
+    exportToFile(trainFile, models.TRAIN)
+
+    if valFile, err = os.Create(VAL_FILE); err != nil {
+        return
+    }
+    defer valFile.Close()
+
+    exportToFile(valFile, models.VAL)
+
+    return err
+}
+
+func exportToFile(file *os.File, dataType uint) (err error) {
+    var engine = models.GetEngine()
+    err = engine.Where("data_type=?", dataType).Iterate(new(models.Dataset), func(i int, bean interface{}) error {
+        dataset := bean.(*models.Dataset)
+        dataset.FillObject()
+        fmt.Fprintf(file, "%s%s %d\n", UPLOADPATH, dataset.File.Key, dataset.TagId)
+        return nil
+    })
     return
 }
