@@ -1,4 +1,4 @@
-net: "train_val.prototxt"
+net: "resourses/train_val.prototxt"
 test_iter: 50
 test_interval: 100
 base_lr: 0.01
@@ -10,6 +10,6 @@ max_iter: 450000
 momentum: 0.9
 weight_decay: 0.0005
 snapshot: 100
-snapshot_prefix: "models/huaban_train"
+snapshot_prefix: "resourses/models/train"
 solver_mode: CPU
 debug_info: false

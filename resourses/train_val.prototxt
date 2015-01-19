@@ -5,13 +5,13 @@ layers {
   top: "data"
   top: "label"
   data_param {
-    source: "huaban_train_lmdb"
+    source: "resourses/train_lmdb"
     backend: LMDB
     batch_size: 50
   }
   transform_param {
     crop_size: 227
-    mean_file: "huaban_mean.binaryproto"
+    mean_file: "resourses/mean.binaryproto"
     mirror: true
   }
   include: { phase: TRAIN }
@@ -22,13 +22,13 @@ layers {
   top: "data"
   top: "label"
   data_param {
-    source: "huaban_val_lmdb"
+    source: "resourses/val_lmdb"
     backend: LMDB
     batch_size: 50
   }
   transform_param {
     crop_size: 227
-    mean_file: "huaban_mean.binaryproto"
+    mean_file: "resourses/mean.binaryproto"
     mirror: false
   }
   include: { phase: TEST }
