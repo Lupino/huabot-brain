@@ -1,0 +1,6 @@
+public/upload/*
+!public/upload/README
+resourses/*
+!resourses/solver.prototxt
+!resourses/train_val.prototxt
+!resourses/models/README.md
