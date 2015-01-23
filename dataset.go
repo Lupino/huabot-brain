@@ -10,6 +10,9 @@ import (
     "encoding/hex"
     "fmt"
     "sync"
+    "image"
+    _ "image/png"
+    _ "image/jpeg"
 )
 
 var trainLocker = new(sync.Mutex)
@@ -21,6 +24,11 @@ func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
         return
     }
     defer source.Close()
+    var img image.Config
+    if img, _, err = image.DecodeConfig(source); err != nil {
+        return
+    }
+    source.Seek(0, 0)
     hasher := sha1.New()
     io.Copy(hasher, source)
     fileKey := hex.EncodeToString(hasher.Sum(nil))
@@ -37,6 +45,9 @@ func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
         if _, err = io.Copy(dst, source); err != nil {
             return
         }
+
+        file.Width = img.Width
+        file.Height = img.Height
 
         if _, err = engine.Insert(file); err != nil {
             return
