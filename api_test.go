@@ -46,7 +46,7 @@ func newfileUploadRequest(uri string, params map[string]string, paramName, path 
 func TestPostDataset(t *testing.T) {
     Convey("POST /api/datasets/", t, func() {
         path, _ := os.Getwd()
-        path += "/api.go"
+        path += "/public/favicon.ico"
         extraParams := map[string]string{
             "tag": "test 1",
         }
