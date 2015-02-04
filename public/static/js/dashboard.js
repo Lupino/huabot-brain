@@ -42,6 +42,7 @@ app.$sidebar.click(function(evt) {
   if ($elem.parent().hasClass("active")) {
     return;
   }
+  hash_max = "";
   updateMenu($elem);
 });
 
@@ -98,6 +99,9 @@ function loadData(max, limit, callback) {
     data.limit = limit;
     app.datasets = data.datasets = app.datasets.concat(data.datasets);
     data.datasets = app.datasets;
+    if (data.datasets.length === 0) {
+      return;
+    }
     var html = template(data);
     app.$container.html(html);
     $("#waterfall").waterfall({
