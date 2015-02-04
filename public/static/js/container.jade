@@ -1,0 +1,17 @@
+- if (datasets) {
+  div#waterfall
+    each val in datasets
+      div.img(data-id=val.dataset_id)
+        div.dataset
+          img(src="/upload/" + val.file.key,width=192,height=192/val.file.width*val.file.height)
+          div.tag #{val.tag.name}
+  - if (datasets.length > 0) {
+    div.load-more(max=datasets[datasets.length - 1].dataset_id)
+      button.btn.btn-lg.btn-info 加载更多...
+  - }
+- }
+
+- if (dataset) {
+  div.img(data-id=dataset.dataset_id)
+    img(src="/upload/" + dataset.file.key,style="width: 100%;")
+- }
