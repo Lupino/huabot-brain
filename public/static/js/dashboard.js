@@ -8,6 +8,7 @@ app.currentPage = "#container .pagination .active";
 app.$modal = $(".modal");
 app.$modalBody = $(".modal .modal-body");
 app.$modalBtns = $(".modal .modal-footer button");
+app.$pageHeader = $("h1.page-header");
 app.target = "all";
 app.modalReady = false;
 app.datasets = [];
@@ -48,6 +49,7 @@ app.$sidebar.click(function(evt) {
 
 function updateMenu($elem) {
   $(app.sidebarActive).removeClass("active");
+  app.$pageHeader.text($elem.text());
   $elem.parent().addClass("active");
   var target = $elem.attr('data-target');
   app.target = target;

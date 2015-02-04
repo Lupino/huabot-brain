@@ -134,7 +134,7 @@ func api(mart *martini.ClassicMartini) {
 
         if dataType == "train" {
             q = q.And("data_type = ?", models.TRAIN)
-        } else if dataType == "test" {
+        } else if dataType == "val" {
             q = q.And("data_type = ?", models.VAL)
         }
 
