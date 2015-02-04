@@ -124,11 +124,20 @@ func api(mart *martini.ClassicMartini) {
             limit = 100
         }
 
+        var dataType = qs.Get("data_type")
+
         var datasets = make([]models.Dataset, 0)
         var q = engine.Desc("id")
         if max > -1 {
             q = q.Where("id < ?", max)
         }
+
+        if dataType == "train" {
+            q = q.And("data_type = ?", models.TRAIN)
+        } else if dataType == "test" {
+            q = q.And("data_type = ?", models.VAL)
+        }
+
         q = q.Limit(limit)
         if err = q.Find(&datasets); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
