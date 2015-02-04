@@ -13,7 +13,7 @@ const (
 type File struct {
     Id        int       `xorm:"pk autoincr"                 json:"file_id,omitempty"`
     Key       string    `xorm:"varchar(128) notnull unique" json:"key,omitempty"`
-    Width     int       `xorm:"integer(4)"                  josn:"width,omitempty"`
+    Width     int       `xorm:"integer(4)"                  json:"width,omitempty"`
     Height    int       `xorm:"integer(4)"                  json:"height,omitempty"`
     CreatedAt time.Time `xorm:"created"                     json:"created_at,omitempty"`
 }
