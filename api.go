@@ -250,7 +250,8 @@ func api(mart *martini.ClassicMartini) {
         if onTraining {
             msg = "on training"
         }
-        r.JSON(http.StatusOK, map[string]string{"msg": msg})
+        hists, _ := models.FetchHistory()
+        r.JSON(http.StatusOK, map[string]interface{}{"msg": msg, "history": hists})
         return
     })
 }
