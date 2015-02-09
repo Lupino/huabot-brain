@@ -3,6 +3,7 @@ package models
 import (
     "github.com/go-xorm/xorm"
     "log"
+    "time"
 )
 
 var engine *xorm.Engine
@@ -12,7 +13,8 @@ func init() {
     if engine, err = xorm.NewEngine(driverName, *sourceName); err != nil {
         log.Fatal(err)
     }
-    if err := engine.Sync(File{}, Tag{}, Dataset{}); err != nil {
+    engine.TZLocation = time.Local
+    if err := engine.Sync(File{}, Tag{}, Dataset{}, History{}); err != nil {
         log.Fatal(err)
     }
 }
