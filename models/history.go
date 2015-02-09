@@ -5,7 +5,7 @@ import (
 )
 
 type History struct {
-    Id        int       `xorm:"pk autoincr"          json:"file_id,omitempty"`
+    Id        int       `xorm:"pk autoincr"          json:"hist_id,omitempty"`
     Key       string    `xorm:"varchar(128) notnull" json:"key,omitempty"`
     Value     string    `xorm:"varchar(128) notnull" json:"value,omitempty"`
     Timestamp time.Time `xorm:"timestamp"            json:"timestamp,omitempty"`
