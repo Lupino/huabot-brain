@@ -14,10 +14,6 @@ var CAFFE = "caffe"
 var COMPUTER_IMAGE_MEAN = "compute_image_mean"
 var CONVERT_IMAGESET = "convert_imageset"
 
-var RRD_FILE = "dataset.rrd"
-var STEP uint = 1
-var HEARTBEAT = 2 * STEP
-
 var iterLine = regexp.MustCompile(`Iteration (?P<iter>\d+)`)
 var accuracyLine = regexp.MustCompile(`accuracy = (?P<accuracy>[0-9\.]+)`)
 var lrLine = regexp.MustCompile(`lr = (?P<lr>[0-9\.e-]+)`)
