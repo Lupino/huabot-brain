@@ -5,14 +5,21 @@ import (
 )
 
 type History struct {
-    Id        int       `xorm:"pk autoincr"          json:"hist_id,omitempty"`
-    Key       string    `xorm:"varchar(128) notnull" json:"key,omitempty"`
-    Value     string    `xorm:"varchar(128) notnull" json:"value,omitempty"`
-    Timestamp time.Time `xorm:"timestamp"            json:"timestamp,omitempty"`
+    Id        int       `xorm:"pk autoincr"     json:"hist_id,omitempty"`
+    Iter      int       `xorm:"int(10) notnull" json:"iter,omitempty"`
+    Lr        float64   `                       json:"lr,omitempty"`
+    Loss      float64   `                       json:"loss,omitempty"`
+    Acc       float64   `                       json:"acc,omitempty"`
+    Timestamp time.Time `xorm:"timestamp"       json:"timestamp,omitempty"`
 }
 
-func AddHistory(key, value string) (err error){
-    var his = &History{Key: key, Value: value, Timestamp: time.Now()}
+func AddHistory(iter int, lr, loss, acc float64) (err error){
+    var his = &History{
+        Lr: lr,
+        Loss: loss,
+        Acc: acc,
+        Timestamp: time.Now(),
+    }
     _, err = engine.Insert(his)
     return
 }

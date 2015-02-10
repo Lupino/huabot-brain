@@ -5,6 +5,7 @@ import (
     "fmt"
     "bufio"
     "regexp"
+    "strconv"
     "os/exec"
     "github.com/Lupino/collect/models"
 )
@@ -23,11 +24,7 @@ var lrLine = regexp.MustCompile(`lr = (?P<lr>[0-9\.e-]+)`)
 var lossLine = regexp.MustCompile(`loss = (?P<loss>[0-9\.]+)`)
 
 func Train(solverFile string) error {
-    return Run("train", "--solver=" + solverFile)
-}
-
-func Run(args... string) error {
-    cmd := exec.Command(CAFFE, args...)
+    cmd := exec.Command(CAFFE, "train", "--solver=" + solverFile)
 
     stderr, _ := cmd.StderrPipe()
 
@@ -38,29 +35,40 @@ func Run(args... string) error {
     reader := bufio.NewReader(stderr)
     models.ResetHistory()
 
+    var iter int
+    var lr, loss, acc float64
+
     for {
         line, _, err := reader.ReadLine()
         if err != nil {
             break
         }
         if iterLine.Match(line) {
-            models.AddHistory("iter", string(iterLine.FindSubmatch(line)[1]))
+            iter, _ = strconv.Atoi(string(iterLine.FindSubmatch(line)[1]))
         }
         if lrLine.Match(line) {
-            models.AddHistory("lr", string(lrLine.FindSubmatch(line)[1]))
+            lr, _ = strconv.ParseFloat(string(lrLine.FindSubmatch(line)[1]), 64)
         }
         if lossLine.Match(line) {
-            models.AddHistory("loss", string(lossLine.FindSubmatch(line)[1]))
+            loss, _ = strconv.ParseFloat(string(lossLine.FindSubmatch(line)[1]), 64)
         }
         if accuracyLine.Match(line) {
-            models.AddHistory("acc", string(accuracyLine.FindSubmatch(line)[1]))
+            acc, _ = strconv.ParseFloat(string(accuracyLine.FindSubmatch(line)[1]), 64)
         }
+        models.AddHistory(iter, lr, loss, acc)
         fmt.Printf("%s\n", line)
     }
 
     cmd.Wait()
 
     return nil
+}
+
+func Run(args... string) error {
+    cmd := exec.Command(CAFFE, args...)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    return cmd.Run()
 }
 
 func ComputeImageMean(sourceFile, binaryFile string) error {
