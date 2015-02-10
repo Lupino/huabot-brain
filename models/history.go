@@ -13,14 +13,21 @@ type History struct {
     Timestamp time.Time `xorm:"timestamp"       json:"timestamp,omitempty"`
 }
 
+var cacheHist = new(History)
+
 func AddHistory(iter int, lr, loss, acc float64) (err error){
-    var his = &History{
+    var hist = &History{
+        Iter: iter,
         Lr: lr,
         Loss: loss,
         Acc: acc,
         Timestamp: time.Now(),
     }
-    _, err = engine.Insert(his)
+
+    if cacheHist.Timestamp.Add(1 * time.Second).Unix() < hist.Timestamp.Unix() {
+        _, err = engine.Insert(cacheHist)
+    }
+    cacheHist = hist
     return
 }
 
@@ -31,6 +38,8 @@ func FetchHistory() (hist []History, err error) {
 }
 
 func ResetHistory() (err error) {
+    cacheHist = new(History)
+    cacheHist.Timestamp = time.Now()
     if err = engine.DropTables(History{}); err != nil {
         return
     }
