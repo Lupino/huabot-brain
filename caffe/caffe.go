@@ -19,7 +19,7 @@ var HEARTBEAT = 2 * STEP
 
 var iterLine = regexp.MustCompile(`Iteration (?P<iter>\d+)`)
 var accuracyLine = regexp.MustCompile(`accuracy = (?P<accuracy>[0-9\.]+)`)
-var lrLine = regexp.MustCompile(`lr = (?P<lr>[0-9\.]+)`)
+var lrLine = regexp.MustCompile(`lr = (?P<lr>[0-9\.e-]+)`)
 var lossLine = regexp.MustCompile(`loss = (?P<loss>[0-9\.]+)`)
 
 func Train(solverFile string) error {
