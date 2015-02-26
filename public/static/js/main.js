@@ -9,9 +9,12 @@ var DropdownButton = ReactBootstrap.DropdownButton;
 var ModalTrigger = ReactBootstrap.ModalTrigger;
 var Modal = ReactBootstrap.Modal;
 var Button = ReactBootstrap.Button;
+var Input = ReactBootstrap.Input;
 var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
+var State = ReactRouter.State;
+var Navigation = ReactRouter.Navigation;
 var RouteHandler = ReactRouter.RouteHandler;
 var Route = ReactRouter.Route;
 var Router = ReactRouter.Router;
@@ -41,7 +44,7 @@ var Dataset = React.createClass({
 
 
 var Datasets = React.createClass({
-  mixins: [ReactRouter.State],
+  mixins: [State],
 
   waterfall: function() {
     jQuery("#waterfall").waterfall({
@@ -153,12 +156,25 @@ var Datasets = React.createClass({
 });
 
 var App = React.createClass({
+  mixins: [State, Navigation],
+
+  handleSubmit: function(evt) {
+    evt.preventDefault();
+    var query = this.getQuery();
+    query.tag = this.refs.tag.getValue();
+    var href = this.makeHref('datasets', this.getParams(), query);
+    window.location.href = href;
+    window.location.reload();
+  },
   render: function() {
     return (
       <div className="app-main">
         <Navbar fixedTop inverse fluid brand="Caffe Learn">
-          <Nav>
+          <Nav right>
           </Nav>
+          <form className="navbar-form navbar-right" onSubmit={this.handleSubmit}>
+            <Input type="text" name="tag" ref="tag" placeholder="Search..." />
+          </form>
         </Navbar>
         <Grid fluid>
           <Row>
