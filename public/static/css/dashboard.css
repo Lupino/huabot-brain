@@ -114,7 +114,15 @@ body {
   color: #999;
   padding: 10px;
 }
+#waterfall > div img {
+  width: 100%;
+}
 
 .load-more {
   text-align: center;
+  margin-bottom: 15px;
+}
+
+.file {
+  overflow: hidden;
 }

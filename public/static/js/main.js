@@ -45,7 +45,7 @@ var Datasets = React.createClass({
 
   waterfall: function() {
     jQuery("#waterfall").waterfall({
-      selector: ".img",
+      selector: ".dataset",
     });
   },
 
@@ -110,9 +110,13 @@ var Datasets = React.createClass({
     var datasets = this.state.datasets || [];
     var loadMore;
     if (datasets.length >= this.limit) {
+      var query = this.getQuery();
+      query = query || {};
+      query.max = datasets[datasets.length - 1].dataset_id;
       loadMore = (
         <div className="load-more">
-          <ButtonLink bsStyle="info" bsSize="large" params={this.getParams()} to="datasets" query={{max: datasets[datasets.length - 1].dataset_id, limit: this.limit}}>加载更多...</ButtonLink>
+          <ButtonLink bsStyle="info" bsSize="large"
+              params={this.getParams()} to="datasets" query={query} block>加载更多...</ButtonLink>
         </div>
       );
     }
@@ -121,13 +125,18 @@ var Datasets = React.createClass({
     }
     this.datasets = datasets;
     var elems = datasets.map(function(dataset) {
+      var width = 192;
+      var height = width / dataset.file.width * dataset.file.height;
+      if (height > 600) {
+        height = 600;
+      }
       return (
         <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name} />}>
-          <div className="img" data-id={dataset.dataset_id}>
-            <div className="dataset">
-              <img src={"/upload/" + dataset.file.key} width={192} height={192/dataset.file.width * dataset.file.height} />
-              <div className="tag">{dataset.tag.name}</div>
+          <div className="dataset" data-id={dataset.dataset_id}>
+            <div className="file" style={{width: width, height: height}}>
+              <img src={"/upload/" + dataset.file.key} />
             </div>
+            <div className="tag">{dataset.tag.name}</div>
           </div>
         </ModalTrigger>
       );
