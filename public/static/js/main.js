@@ -85,10 +85,10 @@ var Datasets = React.createClass({
 
   shouldCleanDatasets: function() {
     var pathname = this.getPathname();
-    var tag = this.getQuery().tag;
-    if (this.cache.pathname !== pathname || this.cache.tag !== tag) {
+    var query = this.getQuery();
+    if (this.cache.pathname !== pathname || this.cache.tag !== query.tag || !query.max) {
       this.cache.pathname = pathname;
-      this.cache.tag = tag;
+      this.cache.tag = query.tag;
       this.cache.scroll = true;
       return true;
     }
