@@ -13,6 +13,8 @@ var Input = ReactBootstrap.Input;
 var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
+var ListGroup = ReactBootstrap.ListGroup;
+var ListGroupItem = ReactBootstrap.ListGroupItem;
 var State = ReactRouter.State;
 var Navigation = ReactRouter.Navigation;
 var RouteHandler = ReactRouter.RouteHandler;
@@ -159,6 +161,61 @@ var Datasets = React.createClass({
   }
 });
 
+var SearchForm = React.createClass({
+  getInitialState: function() {
+    return {
+      value: '',
+      tags: []
+    };
+  },
+
+  getHint: function(word) {
+    var self = this;
+    jQuery.get('/api/tags/hint?word=' + word, function(data) {
+      self.setState(data);
+    });
+  },
+
+  handleChange: function() {
+    this.getHint(this.refs.tag.getValue());
+    this.setState({
+      value: this.refs.tag.getValue()
+    });
+  },
+
+  handleSubmit: function(evt) {
+    evt.preventDefault();
+    this.props.onSubmit(this.state.value);
+  },
+
+  handleListClick: function(eventKey, href, target) {
+    this.props.onSubmit(target);
+    this.setState({tags: [], value: target});
+  },
+
+  render: function() {
+    var list = this.state.tags.map(function(tag) {
+      return <ListGroupItem target={tag.name}> {tag.name}</ListGroupItem>;
+    });
+    return (
+      <form className="navbar-form navbar-right" onSubmit={this.handleSubmit}>
+        <Input type="text"
+          name="tag"
+          value={this.state.value}
+          ref="tag"
+          placeholder="Search..."
+          onChange={this.handleChange} />
+
+        <div className="hint">
+          <ListGroup onClick={this.handleListClick}>
+            {list}
+          </ListGroup>
+        </div>
+      </form>
+    );
+  }
+});
+
 var App = React.createClass({
   mixins: [State, Navigation],
 
@@ -166,10 +223,9 @@ var App = React.createClass({
     return {href: window.location.href};
   },
 
-  handleSubmit: function(evt) {
-    evt.preventDefault();
+  handleSubmit: function(tag) {
     var query = this.getQuery();
-    query.tag = this.refs.tag.getValue();
+    query.tag = tag;
     var href = this.makeHref('datasets', this.getParams(), query);
     window.location.href = href;
     this.setState({href: href});
@@ -180,9 +236,7 @@ var App = React.createClass({
         <Navbar fixedTop inverse fluid brand="Caffe Learn">
           <Nav right>
           </Nav>
-          <form className="navbar-form navbar-right" onSubmit={this.handleSubmit}>
-            <Input type="text" name="tag" ref="tag" placeholder="Search..." />
-          </form>
+          <SearchForm onSubmit={this.handleSubmit} />
         </Navbar>
         <Grid fluid>
           <Row>

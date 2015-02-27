@@ -126,3 +126,8 @@ body {
 .file {
   overflow: hidden;
 }
+
+.hint {
+  position: absolute;
+  width: 172px;
+}

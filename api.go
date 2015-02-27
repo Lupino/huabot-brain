@@ -217,6 +217,18 @@ func api(mart *martini.ClassicMartini) {
         }
     })
 
+    mart.Get(API + "/tags/hint/?", func(req *http.Request, r render.Render) {
+        var qs = req.URL.Query()
+        var word = qs.Get("word")
+        var q = engine.Desc("id")
+        q = q.And("name like \"%" + word + "%\"")
+        q = q.Limit(5)
+        var tags = make([]models.Tag, 0)
+        var err = q.Find(&tags)
+        log.Printf("err: %s\n", err)
+        r.JSON(http.StatusOK, map[string][]models.Tag{"tags": tags})
+    })
+
     mart.Get(API + "/tags/?", func(req *http.Request, r render.Render) {
         var qs = req.URL.Query()
         var err error
