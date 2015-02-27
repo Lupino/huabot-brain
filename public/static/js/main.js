@@ -89,6 +89,7 @@ var Datasets = React.createClass({
     if (this.cache.pathname !== pathname || this.cache.tag !== tag) {
       this.cache.pathname = pathname;
       this.cache.tag = tag;
+      this.cache.scroll = true;
       return true;
     }
     return false;
@@ -100,19 +101,20 @@ var Datasets = React.createClass({
 
   componentDidMount: function() {
     this.cache.datasets = this.cache.datasets || [];
-    if (this.shouldLoadDatasets()) {
-      this.loadDatasets();
-    }
+    this.componentDidUpdate();
   },
 
   componentDidUpdate: function() {
     if (this.shouldLoadDatasets()) {
       if (this.shouldCleanDatasets()) {
-        window.scroll(0, 0);
         this.cleanDatasets();
       }
       this.loadDatasets();
     } else {
+      if (this.cache.scroll) {
+        this.cache.scroll = false;
+        window.scroll(0, 0);
+      }
       this.waterfall();
     }
   },
@@ -135,11 +137,12 @@ var Datasets = React.createClass({
       var oldLastDataset = this.cache.datasets[this.cache.datasets.length - 1];
       var lastDataset = datasets[datasets.length - 1];
       if (oldLastDataset.dataset_id !== lastDataset.dataset_id) {
-        datasets = this.cache.datasets.concat(datasets);
+        this.cache.datasets = this.cache.datasets.concat(datasets);
       }
+    } else {
+      this.cache.datasets = datasets;
     }
-    this.cache.datasets = datasets;
-    var elems = datasets.map(function(dataset) {
+    var elems = this.cache.datasets.map(function(dataset) {
       var width = 192;
       var height = width / dataset.file.width * dataset.file.height;
       if (height > 600) {
@@ -307,18 +310,17 @@ var Dashboard = React.createClass({
 
   componentDidMount: function() {
     this.cache.tags = this.cache.tags || [];
-    if (this.shouldLoadTags()) {
-      this.loadTags();
-    }
+    this.componentDidUpdate();
   },
 
   componentDidUpdate: function() {
     if (this.shouldLoadTags()) {
-      if (this.shouldCleanTags()) {
-        window.scroll(0, 0);
-        this.cleanTags();
-      }
       this.loadTags();
+    } else {
+      if (this.cache.scroll) {
+        this.cache.scroll = false;
+        window.scroll(0, 0);
+      }
     }
   },
 
@@ -340,11 +342,12 @@ var Dashboard = React.createClass({
       var oldLastTag = this.cache.tags[this.cache.tags.length - 1];
       var lastTag = tags[tags.length - 1];
       if (oldLastTag.tag_id !== lastTag.tag_id) {
-        tags = this.cache.tags.concat(tags);
+        this.cache.tags = this.cache.tags.concat(tags);
       }
+    } else {
+      this.cache.tags = tags;
     }
-    this.cache.tags = tags;
-    var elems = tags.map(function(tag) {
+    var elems = this.cache.tags.map(function(tag) {
       return (
         <tr>
           <td>{tag.tag_id}</td>
