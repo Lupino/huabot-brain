@@ -234,8 +234,11 @@ var App = React.createClass({
 
   handleSubmit: function(tag) {
     var query = this.getQuery();
+    var params = this.getParams();
+    params.dataType = params.dataType || 'all';
     query.tag = tag;
-    var href = this.makeHref('datasets', this.getParams(), query);
+    delete query.max;
+    var href = this.makeHref('datasets', params, query);
     window.location.href = href;
     this.setState({href: href});
   },
