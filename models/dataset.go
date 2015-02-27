@@ -19,9 +19,11 @@ type File struct {
 }
 
 type Tag struct {
-    Id        int       `xorm:"pk autoincr"                 json:"tag_id,omitempty"`
-    Name      string    `xorm:"varchar(128) notnull unique" json:"name,omitempty"`
-    CreatedAt time.Time `xorm:"created"                     json:"created_at,omitempty"`
+    Id         int       `xorm:"pk autoincr"                 json:"tag_id,omitempty"`
+    Name       string    `xorm:"varchar(128) notnull unique" json:"name,omitempty"`
+    TrainCount int       `xorm:"tinyint(1) default(0)"       json:"train_count,omitempty"`
+    TestCount  int       `xorm:"tinyint(1) default(0)"       json:"test_count,omitempty"`
+    CreatedAt  time.Time `xorm:"created"                     json:"created_at,omitempty"`
 }
 
 

@@ -77,6 +77,13 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint) (dataset *mo
         if _, err = engine.Insert(dataset); err != nil {
             return
         }
+        var sql string
+        if dataType == models.TRAIN {
+          sql = "update `tag` set `train_count` = `train_count` + 1 where `id` = ?"
+        } else {
+          sql = "update `tag` set `test_count` = `test_count` + 1 where `id` = ?"
+        }
+        engine.Exec(sql, tag.Id)
     }
     dataset.File = file
     dataset.Tag = tag
