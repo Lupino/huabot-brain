@@ -58,9 +58,10 @@ var Datasets = React.createClass({
     var params = this.getParams();
     var max = query.max || '';
     var limit = query.limit || 50;
+    var tag = query.tag || '';
     this.limit = limit;
     var dataType = params.dataType || 'all';
-    jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType, function(data) {
+    jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType + '&tag=' + tag, function(data) {
       self.setState(data);
     });
   },
@@ -158,13 +159,17 @@ var Datasets = React.createClass({
 var App = React.createClass({
   mixins: [State, Navigation],
 
+  getInitialState: function() {
+    return {href: window.location.href};
+  },
+
   handleSubmit: function(evt) {
     evt.preventDefault();
     var query = this.getQuery();
     query.tag = this.refs.tag.getValue();
     var href = this.makeHref('datasets', this.getParams(), query);
     window.location.href = href;
-    window.location.reload();
+    this.setState({href: href});
   },
   render: function() {
     return (

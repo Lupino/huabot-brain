@@ -126,10 +126,23 @@ func api(mart *martini.ClassicMartini) {
 
         var dataType = qs.Get("data_type")
 
+        var tagName = qs.Get("tag")
+
         var datasets = make([]models.Dataset, 0)
         var q = engine.Desc("id")
         if max > -1 {
             q = q.Where("id < ?", max)
+        }
+
+        if tagName != "" {
+            tag := &models.Tag{Name: tagName}
+            has, _ := engine.Get(tag)
+            if !has {
+                r.JSON(http.StatusNotFound,
+                       map[string]string{"err": "tag: " + tagName + " not found."})
+                return
+            }
+            q = q.And("tag_id = ?", tag.Id)
         }
 
         if dataType == "train" {
