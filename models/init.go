@@ -14,7 +14,7 @@ func init() {
         log.Fatal(err)
     }
     engine.TZLocation = time.Local
-    if err := engine.Sync(File{}, Tag{}, Dataset{}, History{}); err != nil {
+    if err := engine.Sync(File{}, Tag{}, Dataset{}); err != nil {
         log.Fatal(err)
     }
 }
