@@ -171,9 +171,13 @@ var Datasets = React.createClass({
 });
 
 var SearchForm = React.createClass({
+  mixins: [State],
+
   getInitialState: function() {
+    var query = this.getQuery();
+
     return {
-      value: '',
+      value: query.tag || '',
       tags: []
     };
   },
@@ -183,6 +187,17 @@ var SearchForm = React.createClass({
     jQuery.get('/api/tags/hint?word=' + word, function(data) {
       self.setState(data);
     });
+  },
+
+  componentDidUpdate: function() {
+    var query = this.getQuery();
+    if (query.tag && query.tag !== this.state.value) {
+      this.setState({
+        value: query.tag
+      });
+    } else if (!query.tag && this.state.value) {
+      this.setState({value: ''});
+    }
   },
 
   handleChange: function() {
@@ -229,7 +244,8 @@ var App = React.createClass({
   mixins: [State, Navigation],
 
   getInitialState: function() {
-    return {href: window.location.href};
+    var tag = this.getQuery().tag || '';
+    return {tag: tag}
   },
 
   handleSubmit: function(tag) {
@@ -240,8 +256,9 @@ var App = React.createClass({
     delete query.max;
     var href = this.makeHref('datasets', params, query);
     window.location.href = href;
-    this.setState({href: href});
+    this.setState({tag: tag || ''});
   },
+
   render: function() {
     return (
       <div className="app-main">
@@ -300,7 +317,6 @@ var Dashboard = React.createClass({
   },
 
   shouldCleanTags: function() {
-    console.log(this.getQuery());
     if (!this.getQuery().max) {
       return true;
     }
