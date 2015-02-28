@@ -262,7 +262,7 @@ var App = React.createClass({
   render: function() {
     return (
       <div className="app-main">
-        <Navbar fixedTop inverse fluid brand="Caffe Learn">
+        <Navbar fixedTop inverse fluid brand="Huabot Brain">
           <Nav right>
             <NavItemLink to="dashboard">Dashboard</NavItemLink>
           </Nav>

@@ -4,7 +4,7 @@ import (
     "github.com/go-martini/martini"
     "github.com/martini-contrib/render"
     "github.com/martini-contrib/binding"
-    "github.com/Lupino/collect/models"
+    "github.com/Lupino/huabot-brain/models"
     "mime/multipart"
     "strconv"
     "net/http"

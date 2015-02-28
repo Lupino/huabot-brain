@@ -1,8 +1,8 @@
 package main
 
 import (
-    "github.com/Lupino/collect/models"
-    "github.com/Lupino/collect/caffe"
+    "github.com/Lupino/huabot-brain/models"
+    "github.com/Lupino/huabot-brain/caffe"
     "mime/multipart"
     "crypto/sha1"
     "io"

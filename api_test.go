@@ -2,7 +2,7 @@ package main
 
 import (
     . "github.com/smartystreets/goconvey/convey"
-    "github.com/Lupino/collect/models"
+    "github.com/Lupino/huabot-brain/models"
     "testing"
     "net/http"
     "os"
