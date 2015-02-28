@@ -2,7 +2,7 @@ package main
 
 import (
     "github.com/Lupino/huabot-brain/models"
-    "github.com/Lupino/huabot-brain/caffe"
+    "github.com/mikespook/gearman-go/client"
     "mime/multipart"
     "crypto/sha1"
     "io"
@@ -11,12 +11,10 @@ import (
     "fmt"
     "sync"
     "image"
+    "log"
     _ "image/png"
     _ "image/jpeg"
 )
-
-var trainLocker = new(sync.Mutex)
-var onTraining = false
 
 func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     var source multipart.File
@@ -90,68 +88,57 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint) (dataset *mo
     return
 }
 
-func exportDataset() (err error) {
-
-    var trainFile, valFile *os.File
-    if trainFile, err = os.Create(TRAIN_FILE); err != nil {
-        return
-    }
-    defer trainFile.Close()
-
-    exportToFile(trainFile, models.TRAIN)
-
-    if valFile, err = os.Create(VAL_FILE); err != nil {
-        return
-    }
-    defer valFile.Close()
-
-    exportToFile(valFile, models.VAL)
-
-    return err
-}
-
-func exportToFile(file *os.File, dataType uint) (err error) {
+func loadDataset(dataType uint) (text string, err error) {
     var engine = models.GetEngine()
     err = engine.Where("data_type=?", dataType).Iterate(new(models.Dataset), func(i int, bean interface{}) error {
         dataset := bean.(*models.Dataset)
         dataset.FillObject()
-        fmt.Fprintf(file, "%s %d\n", dataset.File.Key, dataset.TagId)
+        text = fmt.Sprintf("%s%s %d\n", text, dataset.File.Key, dataset.TagId)
         return nil
     })
     return
 }
 
-func caffeTrain() (err error) {
-    if onTraining {
-        return
+func submit(funcName string, workload []byte) ([]byte, error) {
+    var mutex sync.Mutex
+    var result []byte
+    var errResult error
+    c, err := client.New("tcp4", "127.0.0.1:4730")
+    if err != nil {
+        return nil, err
     }
-
-    onTraining = true
-    trainLocker.Lock()
-    defer (func() {
-        onTraining = false
-        trainLocker.Unlock()
-    })()
-
-    if err = exportDataset(); err != nil {
-        return
+    defer c.Close()
+    c.ErrorHandler = func(e error) {
+        log.Println(e)
     }
-
-    os.RemoveAll(TRAIN_LMDB)
-    os.RemoveAll(VAL_LMDB)
-
-
-    if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
-        return
+    jobHandler := func(resp *client.Response) {
+        if resp.DataType == client.WorkComplate {
+            result, errResult = resp.Result()
+            mutex.Unlock()
+        }
     }
-
-    if err = caffe.ConvertImageset("--resize_height=256", "--resize_width=256", "--shuffle", UPLOADPATH, VAL_FILE, VAL_LMDB); err != nil {
-        return
+    _, err = c.Do(funcName, workload, client.JobNormal, jobHandler)
+    if err != nil {
+        log.Printf("gearman Do %s Error: %s\n", funcName, err)
+        return nil, err
     }
+    mutex.Lock()
+    mutex.Lock()
+    return result, errResult
+}
 
-    if err = caffe.ComputeImageMean(TRAIN_LMDB, MEAN_FILE); err != nil {
-        return
+func caffeTrain() (string, error) {
+    result, err := submit("CAFFE:TRAIN", nil)
+    if err != nil {
+        return "", err
     }
+    return string(result), nil
+}
 
-    return caffe.Train(SOLVER_FILE)
+func caffeTrainStatus() (string, error) {
+    result, err := submit("CAFFE:TRAIN:STATUS", nil)
+    if err != nil {
+        return "", err
+    }
+    return string(result), nil
 }

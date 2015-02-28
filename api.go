@@ -259,23 +259,40 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Post(API + "/train/?", func(r render.Render) {
-        if !onTraining {
-            go (func() {
-                if err := caffeTrain(); err != nil {
-                    log.Printf("CaffeTrainError: %s\n", err.Error())
-                }
-            })()
-
+        result, err := caffeTrain()
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
         }
-        r.JSON(http.StatusOK, map[string]string{"msg": "on training"})
+        r.JSON(http.StatusOK, map[string]string{"msg": result})
         return
     })
+
     mart.Get(API + "/train/?", func(r render.Render) {
-        var msg = "no train"
-        if onTraining {
-            msg = "on training"
+        result, err := caffeTrainStatus()
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
         }
-        r.JSON(http.StatusOK, map[string]interface{}{"msg": msg})
+        r.JSON(http.StatusOK, map[string]string{"msg": result})
         return
+    })
+
+    mart.Get(API + "/train.txt", func(r render.Render) {
+        text, err := loadDataset(models.TRAIN)
+        if err != nil {
+            r.Data(http.StatusInternalServerError, nil)
+            return
+        }
+        r.Data(http.StatusOK, []byte(text))
+    })
+
+    mart.Get(API + "/val.txt", func(r render.Render) {
+        text, err := loadDataset(models.VAL)
+        if err != nil {
+            r.Data(http.StatusInternalServerError, nil)
+            return
+        }
+        r.Data(http.StatusOK, []byte(text))
     })
 }

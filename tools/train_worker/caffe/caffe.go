@@ -9,10 +9,6 @@ var CAFFE = "caffe"
 var COMPUTER_IMAGE_MEAN = "compute_image_mean"
 var CONVERT_IMAGESET = "convert_imageset"
 
-func Train(solverFile string) error {
-    return Run("train", "--solver=" + solverFile)
-}
-
 func Run(args... string) error {
     cmd := exec.Command(CAFFE, args...)
     cmd.Stdout = os.Stdout
