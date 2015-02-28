@@ -1,0 +1,10 @@
+reset
+set terminal png
+set output "/tmp/acc.png"
+set style data lines
+set key right
+
+set title "Test accuracy vs. training iterations"
+set xlabel "Training iterations"
+set ylabel "Test accuracy"
+plot "caffe.INFO.test" using 1:3 title "Huabot Brain"

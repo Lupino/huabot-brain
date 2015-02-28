@@ -7,6 +7,8 @@ import (
     "log"
     "io"
     "os"
+    "os/exec"
+    "io/ioutil"
     "sync"
 )
 
@@ -22,6 +24,7 @@ const (
     MEAN_FILE = "resourses/mean.binaryproto"
     SOLVER_FILE = "resourses/solver.prototxt"
     LOG_DIR = "resourses/logs"
+    PLOT_ROOT = "resourses/plot"
     BRAIN_ROOT = "http://127.0.0.1:3000/api"
 )
 
@@ -118,7 +121,26 @@ func caffeStatusTask(job worker.Job) (data []byte, err error) {
 }
 
 func caffePlotTask(job worker.Job) (data []byte, err error) {
-    return []byte("training"), nil
+    suffix := string(job.Data())
+
+    if err = run(PLOT_ROOT + "/parse_log.sh", LOG_DIR + "/caffe.INFO"); err != nil {
+        log.Printf("Error: %s\n", err)
+        return
+    }
+
+    if err = run("gnuplot", PLOT_ROOT + "/plot_log.gnuplot." + suffix); err != nil {
+        log.Printf("Error: %s\n", err)
+        return
+    }
+    data, err = ioutil.ReadFile("/tmp/" + suffix + ".png")
+    return
+}
+
+func run(cmdName string, args... string) (error) {
+    cmd := exec.Command(cmdName, args...)
+    cmd.Stdout = os.Stdout
+    cmd.Stderr = os.Stderr
+    return cmd.Run()
 }
 
 func main() {
@@ -129,6 +151,7 @@ func main() {
     w.AddServer("tcp4", "127.0.0.1:4730")
     w.AddFunc("CAFFE:TRAIN", caffeTrainTask, worker.Unlimited)
     w.AddFunc("CAFFE:TRAIN:STATUS", caffeStatusTask, worker.Unlimited)
+    w.AddFunc("CAFFE:TRAIN:PLOT", caffePlotTask, worker.Unlimited)
 
     if err := w.Ready(); err != nil {
         log.Fatal(err)

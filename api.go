@@ -295,4 +295,24 @@ func api(mart *martini.ClassicMartini) {
         }
         r.Data(http.StatusOK, []byte(text))
     })
+
+    mart.Get(API + "/loss.png", func(r render.Render) {
+        result, err := caffeTrainPlot("loss")
+        if err != nil {
+            r.Data(http.StatusInternalServerError, nil)
+            return
+        }
+        r.Data(http.StatusOK, result)
+        return
+    })
+
+    mart.Get(API + "/acc.png", func(r render.Render) {
+        result, err := caffeTrainPlot("acc")
+        if err != nil {
+            r.Data(http.StatusInternalServerError, nil)
+            return
+        }
+        r.Data(http.StatusOK, result)
+        return
+    })
 }

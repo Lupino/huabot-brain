@@ -381,10 +381,10 @@ var Dashboard = React.createClass({
         <h1 className="page-header"> Dashboard </h1>
         <Row className="train-status">
           <Col xs={6}>
-            <img src="/static/imgs/acc.png" />
+            <img src="/api/loss.png" />
           </Col>
           <Col xs={6}>
-            <img src="/static/imgs/acc.png" />
+            <img src="/api/acc.png" />
           </Col>
         </Row>
         <h2 class="sub-header">Tags</h2>

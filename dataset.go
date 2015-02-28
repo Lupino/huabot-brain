@@ -142,3 +142,7 @@ func caffeTrainStatus() (string, error) {
     }
     return string(result), nil
 }
+
+func caffeTrainPlot(plotType string) ([]byte, error) {
+    return submit("CAFFE:TRAIN:PLOT", []byte(plotType))
+}
