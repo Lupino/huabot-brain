@@ -175,6 +175,7 @@ var SearchForm = React.createClass({
 
   getInitialState: function() {
     var query = this.getQuery();
+    this.cache = this.cache || {};
 
     return {
       value: query.tag || '',
@@ -189,7 +190,28 @@ var SearchForm = React.createClass({
     });
   },
 
+  shouldCleanHint: function() {
+    var path = this.getPath();
+    if (this.cache.path === path) {
+      return false;
+    }
+    this.cache.path = path;
+    return true;
+
+  },
+
+  cleanHint: function() {
+    this.setState({tags: []});
+  },
+
   componentDidUpdate: function() {
+    if (this.cache.changed) {
+      if (this.shouldCleanHint()) {
+        this.cache.changed = false;
+        this.cleanHint();
+      }
+      return;
+    }
     var query = this.getQuery();
     if (query.tag && query.tag !== this.state.value) {
       this.setState({
@@ -198,9 +220,11 @@ var SearchForm = React.createClass({
     } else if (!query.tag && this.state.value) {
       this.setState({value: ''});
     }
+    this.cache.path = this.getPath();
   },
 
   handleChange: function() {
+    this.cache.changed = true;
     this.getHint(this.refs.tag.getValue());
     this.setState({
       value: this.refs.tag.getValue()
@@ -209,10 +233,12 @@ var SearchForm = React.createClass({
 
   handleSubmit: function(evt) {
     evt.preventDefault();
+    this.cache.changed = false;
     this.props.onSubmit(this.state.value);
   },
 
   handleListClick: function(eventKey, href, target) {
+    this.cache.changed = false;
     this.props.onSubmit(target);
     this.setState({tags: [], value: target});
   },
