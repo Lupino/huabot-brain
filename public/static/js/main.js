@@ -360,6 +360,10 @@ var Dashboard = React.createClass({
 
   componentDidUpdate: function() {
     if (this.shouldLoadTags()) {
+      if (this.shouldCleanTags()) {
+        this.cache.scroll = true;
+        this.cleanTags();
+      }
       this.loadTags();
     } else {
       if (this.cache.scroll) {
