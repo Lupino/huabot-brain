@@ -1,12 +1,11 @@
 package main
 
-const (
-    UPLOADPATH = "public/upload/"
+import (
+    "flag"
+)
+
+var (
     API = "/api"
-    TRAIN_FILE = "resourses/train.txt"
-    VAL_FILE = "resourses/val.txt"
-    TRAIN_LMDB = "resourses/train_lmdb"
-    VAL_LMDB = "resourses/val_lmdb"
-    MEAN_FILE = "resourses/mean.binaryproto"
-    SOLVER_FILE = "resourses/solver.prototxt"
+    GEARMAND = flag.String("gearmand", "127.0.0.1:4730", "The Gearmand server.")
+    UPLOADPATH = flag.String("datasets", "public/upload/", "The datasets path.")
 )

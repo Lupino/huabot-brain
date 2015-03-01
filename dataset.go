@@ -35,7 +35,7 @@ func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     has, _ := engine.Get(file)
     if !has {
         var dst *os.File
-        if dst, err = os.Create(UPLOADPATH + fileKey); err != nil {
+        if dst, err = os.Create(*UPLOADPATH + fileKey); err != nil {
             return
         }
         defer dst.Close()
@@ -103,7 +103,7 @@ func submit(funcName string, workload []byte) ([]byte, error) {
     var mutex sync.Mutex
     var result []byte
     var errResult error
-    c, err := client.New("tcp4", "127.0.0.1:4730")
+    c, err := client.New("tcp4", *GEARMAND)
     if err != nil {
         return nil, err
     }

@@ -10,23 +10,31 @@ import (
     "os/exec"
     "io/ioutil"
     "sync"
+    "flag"
 )
 
 var trainLock = false
 var trainLocker = new(sync.Mutex)
 
-const (
-    UPLOADPATH = "public/upload/"
-    TRAIN_FILE = "resourses/train.txt"
-    VAL_FILE = "resourses/val.txt"
-    TRAIN_LMDB = "resourses/train_lmdb"
-    VAL_LMDB = "resourses/val_lmdb"
-    MEAN_FILE = "resourses/mean.binaryproto"
-    SOLVER_FILE = "resourses/solver.prototxt"
-    LOG_DIR = "resourses/logs"
-    PLOT_ROOT = "resourses/plot"
-    BRAIN_ROOT = "http://127.0.0.1:3000/api"
+
+var (
+    resoursesPath = flag.String("resourses", "resourses", "The resourses path.")
+    UPLOADPATH = flag.String("datasets", "public/upload/", "The datasets path.")
+    TRAIN_FILE = *resoursesPath + "/train.txt"
+    VAL_FILE = *resoursesPath + "/val.txt"
+    TRAIN_LMDB = *resoursesPath + "/train_lmdb"
+    VAL_LMDB = *resoursesPath + "/val_lmdb"
+    MEAN_FILE = *resoursesPath + "/mean.binaryproto"
+    SOLVER_FILE = *resoursesPath + "/solver.prototxt"
+    LOG_DIR = *resoursesPath + "/logs"
+    PLOT_ROOT = *resoursesPath + "/plot"
+    BRAIN_ROOT = flag.String("api", "http://127.0.0.1:3000/api", "The Huabot Brain api root.")
+    GEARMAND = flag.String("gearmand", "127.0.0.1:4730", "The Gearmand server.")
 )
+
+func init() {
+    flag.Parse()
+}
 
 func loadFile(url string, file *os.File) (err error) {
     log.Printf("load %s\n", url)
@@ -77,7 +85,7 @@ func caffeTrain() {
         trainLocker.Unlock()
     })()
 
-    if err = loadDataset(BRAIN_ROOT); err != nil {
+    if err = loadDataset(*BRAIN_ROOT); err != nil {
         log.Printf("Error: %s\n", err)
         return
     }
@@ -86,12 +94,12 @@ func caffeTrain() {
     os.RemoveAll(VAL_LMDB)
 
 
-    if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
+    if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", *UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
         log.Printf("Error: %s\n", err)
         return
     }
 
-    if err = caffe.ConvertImageset("--resize_height=256", "--resize_width=256", "--shuffle", UPLOADPATH, VAL_FILE, VAL_LMDB); err != nil {
+    if err = caffe.ConvertImageset("--resize_height=256", "--resize_width=256", "--shuffle", *UPLOADPATH, VAL_FILE, VAL_LMDB); err != nil {
         log.Printf("Error: %s\n", err)
         return
     }
@@ -148,7 +156,7 @@ func main() {
     w.ErrorHandler = func(e error) {
         log.Println(e)
     }
-    w.AddServer("tcp4", "127.0.0.1:4730")
+    w.AddServer("tcp4", *GEARMAND)
     w.AddFunc("CAFFE:TRAIN", caffeTrainTask, worker.Unlimited)
     w.AddFunc("CAFFE:TRAIN:STATUS", caffeStatusTask, worker.Unlimited)
     w.AddFunc("CAFFE:TRAIN:PLOT", caffePlotTask, worker.Unlimited)
