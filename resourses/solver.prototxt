@@ -10,6 +10,6 @@ max_iter: 450000
 momentum: 0.9
 weight_decay: 0.0005
 snapshot: 100
-snapshot_prefix: "resourses/models/train"
+snapshot_prefix: "resourses/models/huabot-brain"
 solver_mode: CPU
 debug_info: false
