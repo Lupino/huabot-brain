@@ -9,6 +9,8 @@ var Input = ReactBootstrap.Input;
 var Grid = ReactBootstrap.Grid;
 var Row = ReactBootstrap.Row;
 var Col = ReactBootstrap.Col;
+var Well = ReactBootstrap.Well;
+var Panel = ReactBootstrap.Panel;
 var ListGroup = ReactBootstrap.ListGroup;
 var ListGroupItem = ReactBootstrap.ListGroupItem;
 var Table = ReactBootstrap.Table;
@@ -301,6 +303,7 @@ var App = React.createClass({
                 <NavItemLink to="datasets" params={{dataType: 'all'}}>所有数据</NavItemLink>
                 <NavItemLink to="datasets" params={{dataType: 'train'}}>训练数据</NavItemLink>
                 <NavItemLink to="datasets" params={{dataType: 'val'}}>验证数据</NavItemLink>
+                <NavItemLink to="demo">DEMO</NavItemLink>
               </Nav>
             </Col>
             <Col sm={9} smOffset={3} md={10} mdOffset={2}>
@@ -437,10 +440,110 @@ var Dashboard = React.createClass({
   }
 });
 
+var DEMO = React.createClass({
+  mixins: [State, Navigation],
+
+  predict: function(img_url) {
+    var self = this;
+    jQuery.post('/api/predict', {img_url: img_url}, function(data) {
+      self.setState(data);
+    });
+
+  },
+
+  getInitialState: function() {
+    this.cache = {};
+    var query = this.getQuery();
+    var img_url = query.img_url || '';
+    return {bet_result: [], time: null, err: null};
+  },
+
+  componentDidMount: function() {
+    this.componentDidUpdate();
+  },
+
+  componentDidUpdate: function() {
+    var query = this.getQuery();
+    if (query.img_url && query.img_url !== this.cache.imgUrl) {
+      this.cache.imgUrl = query.img_url;
+      this.predict(this.cache.imgUrl);
+    }
+  },
+
+  handleSubmit: function(evt) {
+    evt.preventDefault();
+    var imgUrl = this.refs.imgUrl.getValue();
+    if (imgUrl === this.cache.imgUrl) {
+      return;
+    }
+    this.cache.imgUrl = imgUrl;
+    this.predict(imgUrl);
+    var href = this.makeHref('demo', {}, {img_url: imgUrl});
+    window.location.href = href;
+  },
+
+  render: function() {
+    var elems = this.state.bet_result.map(function(result) {
+      var tag = result.tag;
+      return (
+        <tr>
+          <td>{tag.tag_id}</td>
+          <td><Link to="datasets" params={{dataType: 'all'}} query={{tag: tag.name}}>{tag.name}</Link></td>
+          <td>{result.score}</td>
+        </tr>
+      );
+    });
+
+    var image;
+    if (this.cache.imgUrl) {
+      image = <img src={"/api/proxy?url=" + this.cache.imgUrl} />;
+    }
+
+    var time = 'loading...';
+    if (this.state.time) {
+      time = this.state.time + ' s';
+    }
+
+    return (
+      <div className="dashboard demo">
+        <Well>
+          <h4>Enter an image url then predict tags.</h4>
+          <form onSubmit={this.handleSubmit}>
+            <Input type="url" name="img_url" ref="imgUrl" />
+          </form>
+        </Well>
+        <Row className="result">
+          <Col xs={6}>
+            {image}
+          </Col>
+          <Col xs={6}>
+            <Panel> Spend time: {time} </Panel>
+            <Table striped bordered condensed hover>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Tag</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {elems}
+              </tbody>
+            </Table>
+          </Col>
+        </Row>
+        <br />
+        <br />
+      </div>
+    );
+  }
+});
+
 var routes = (
   <Route handler={App} path="/">
     <DefaultRoute handler={Dashboard} />
     <Route name="dashboard" handler={Dashboard} />
+    <Route name="demo" handler={DEMO} />
     <Route name="datasets" handler={Datasets} path="/ds/:dataType"/>
     <NotFoundRoute handler={Datasets} />
   </Route>

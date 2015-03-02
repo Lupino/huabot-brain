@@ -8,6 +8,7 @@ import (
     "mime/multipart"
     "strconv"
     "net/http"
+    "io/ioutil"
     "log"
 )
 
@@ -327,6 +328,21 @@ func api(mart *martini.ClassicMartini) {
             return
         }
         r.JSON(http.StatusOK, result)
+        return
+    })
+
+    mart.Get(API + "/proxy/?", func(req *http.Request, r render.Render) {
+        var qs = req.URL.Query()
+        var url = qs.Get("url")
+        var resp *http.Response
+        var err error
+        if resp, err = http.Get(url); err != nil {
+            r.Data(http.StatusNotFound, nil)
+            return
+        }
+        defer resp.Body.Close()
+        data, _ := ioutil.ReadAll(resp.Body)
+        r.Data(http.StatusOK, data)
         return
     })
 }
