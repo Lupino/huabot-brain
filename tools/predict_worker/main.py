@@ -7,7 +7,7 @@ import cStringIO as StringIO
 import json
 import urllib2
 from caffe.io import resize_image
-# import logging
+import logging
 # logging.basicConfig(level=logging.DEBUG)
 
 caffe.set_mode_cpu()
@@ -25,15 +25,24 @@ def load_binaryproto(fn):
 
 class Classifier(object):
     def __init__(self, resoursesPath):
-        # mean_file = resoursesPath + "/mean.binaryproto"
+        mean_file = resoursesPath + "/mean.binaryproto"
         model_def_file = resoursesPath + "/deploy.prototxt"
         pretrained_model_file = resoursesPath + "/models/huabot-brain.caffemodel"
+
+        mean=load_binaryproto(mean_file)
+
         self.net = caffe.Classifier(
             model_def_file, pretrained_model_file,
+            image_dims=(256, 256),
             raw_scale=RAW_SCALE,
-            # mean=load_binaryproto(mean_file),
             channel_swap=(2, 1, 0)
         )
+
+        in_shape = self.net.transformer.inputs[self.net.inputs[0]]
+        if mean.shape[1:] != in_shape[2:]:
+            mean = caffe.io.resize_image(mean.transpose((1,2,0)), in_shape[2:]).transpose((2,0,1))
+
+        self.net.transformer.set_mean(self.net.inputs[0], mean)
 
     def classify_image(self, image):
         try:
@@ -42,13 +51,12 @@ class Classifier(object):
             endtime = time.time()
 
             indices = (-scores).argsort()[:MAX_PREDICT_LENGTH]
-            print(indices)
             meta = [{'id':i, 'score': float(scores[i])} for i in indices]
             return (True, meta, endtime - starttime)
 
         except Exception as err:
-           print(err)
-           return (False, 'Something went wrong when classifying the '
+            logging.exception(err)
+            return (False, 'Something went wrong when classifying the '
                           'image. Maybe try another one?')
 
 class Brain(object):
@@ -68,7 +76,6 @@ class Brain(object):
         self._add_func('CAFFE:PREDICT', self.classify_image)
         self._add_func('CAFFE:PREDICT:URL', self.classify_image_url)
         while 1:
-            print('wait...')
             job = self._worker.getJob()
             func = self._funcs.get(job.name)
             if func:
@@ -76,7 +83,7 @@ class Brain(object):
                     func(job)
                 except Exception as e:
                     job.sendWorkComplete(json.dumps({'err': str(e)}))
-                   print('process %s error: %s'%(job.name, e))
+                    print('process %s error: %s'%(job.name, e))
 
     def classify_image(self, job):
         self._classify_image(job, job.arguments)
