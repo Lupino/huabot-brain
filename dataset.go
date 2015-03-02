@@ -8,6 +8,7 @@ import (
     "io"
     "os"
     "encoding/hex"
+    "encoding/json"
     "fmt"
     "sync"
     "image"
@@ -15,6 +16,17 @@ import (
     _ "image/png"
     _ "image/jpeg"
 )
+
+type PredictTag struct {
+    Id int         `json:"id,omitempty"`
+    Score float64  `json:"score,omitempty"`
+    Tag models.Tag `json:"tag,omitempty"`
+}
+type PredictResult struct {
+    BetResult []PredictTag `json:"bet_result,omitempty"`
+    Time  float64          `json:"time,omitempty"`
+    Error string           `json:"err,omitempty"`
+}
 
 func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     var source multipart.File
@@ -145,4 +157,22 @@ func caffeTrainStatus() (string, error) {
 
 func caffeTrainPlot(plotType string) ([]byte, error) {
     return submit("CAFFE:TRAIN:PLOT", []byte(plotType))
+}
+
+func caffePredict(url string) (result PredictResult, err error) {
+    var data []byte
+    if data, err = submit("CAFFE:PREDICT:URL", []byte(url)); err != nil {
+        return
+    }
+    if err = json.Unmarshal(data, &result); err != nil {
+        return
+    }
+
+    var engine = models.GetEngine()
+    for i, ptag := range result.BetResult {
+        ptag.Tag.Id = ptag.Id
+        engine.Get(&ptag.Tag)
+        result.BetResult[i].Tag = ptag.Tag
+    }
+    return
 }

@@ -16,6 +16,10 @@ type FileForm struct {
     File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
+type PredictForm struct {
+    ImgUrl string `form:"img_url" binding:"required"`
+}
+
 type TagForm struct {
     Tag  string                `form:"tag"  binding:"required"`
 }
@@ -313,6 +317,16 @@ func api(mart *martini.ClassicMartini) {
             return
         }
         r.Data(http.StatusOK, result)
+        return
+    })
+
+    mart.Post(API + "/predict/?", binding.Bind(PredictForm{}), func(form PredictForm, r render.Render) {
+        result, err := caffePredict(form.ImgUrl)
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, result)
         return
     })
 }
