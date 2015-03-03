@@ -32,6 +32,10 @@ Go to <http://127.0.0.1:3000/react.html>
 
 Just click Train button to train the network.
 
+### learn more
+
+see [API.md](https://github.com/Lupino/huabot-brain/blob/master/API.md)
+
 Requirements
 ------------
 
