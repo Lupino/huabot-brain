@@ -279,6 +279,17 @@ func api(mart *martini.ClassicMartini) {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
         }
+        r.Header().Set(render.ContentType, render.ContentJSON)
+        r.Data(http.StatusOK, result)
+        return
+    })
+
+    mart.Delete(API + "/train/?", func(r render.Render) {
+        result, err := caffeTrainStop()
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
         r.JSON(http.StatusOK, map[string]string{"msg": result})
         return
     })

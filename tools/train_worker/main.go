@@ -11,6 +11,7 @@ import (
     "io/ioutil"
     "sync"
     "flag"
+    "strings"
 )
 
 var trainLock = false
@@ -109,6 +110,10 @@ func caffeTrain() {
         return
     }
 
+    if !trainLock {
+        return
+    }
+
     if err = caffe.Run("train", "--solver=" + SOLVER_FILE, "-log_dir=" + LOG_DIR); err != nil {
         log.Printf("Error: %s\n", err)
         return
@@ -120,12 +125,35 @@ func caffeTrainTask(job worker.Job) (data []byte, err error) {
     return []byte("training"), nil
 }
 
+func caffeTrainStopTask(job worker.Job) (data []byte, err error) {
+    run("sh", "-c", "\"ps aux | grep 'caffe train' | grep -v grep | awk '{print \\$2}' | xargs kill\"")
+    trainLock = false
+    return []byte("ok"), nil
+}
+
 func caffeStatusTask(job worker.Job) (data []byte, err error) {
-    status := "no training"
+    status := "no train"
     if trainLock {
         status = "training"
     }
-    return []byte(status), nil
+    if err = run(*resoursesPath + "/last_status.sh", LOG_DIR + "/caffe.INFO", *resoursesPath + "/status"); err != nil {
+      return []byte("{\"status\": \"" + status + ", \"acc\": 0, \"loss\": 0}"), nil
+    }
+
+
+    var tmp []byte
+    var acc, loss string
+    tmp, _ = ioutil.ReadFile(*resoursesPath + "/status.acc.txt")
+    acc = strings.Trim(string(tmp), "\n ")
+    tmp, _ = ioutil.ReadFile(*resoursesPath + "/status.loss.txt")
+    loss = strings.Trim(string(tmp), "\n ")
+    if acc == "" {
+        acc = "0"
+    }
+    if loss == "" {
+        loss = "0"
+    }
+    return []byte("{\"status\": \"" + status + "\", \"acc\": " + string(acc) + ", \"loss\": " + string(loss) + "}"), nil
 }
 
 func caffePlotTask(job worker.Job) (data []byte, err error) {
@@ -160,6 +188,7 @@ func main() {
     w.AddFunc("CAFFE:TRAIN", caffeTrainTask, worker.Unlimited)
     w.AddFunc("CAFFE:TRAIN:STATUS", caffeStatusTask, worker.Unlimited)
     w.AddFunc("CAFFE:TRAIN:PLOT", caffePlotTask, worker.Unlimited)
+    w.AddFunc("CAFFE:TRAIN:STOP", caffeTrainStopTask, worker.Unlimited)
 
     if err := w.Ready(); err != nil {
         log.Fatal(err)

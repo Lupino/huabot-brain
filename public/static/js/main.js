@@ -331,9 +331,32 @@ var Dashboard = React.createClass({
 
   },
 
+  loadStatus: function() {
+    var self = this;
+    jQuery.get('/api/train', function(data) {
+      self.setState(data);
+    })
+  },
+
+  handleTrain: function() {
+    var self = this;
+    jQuery.post('/api/train', function(data) {
+      self.setState({status: 'training', loss: 0, acc: 0})
+    });
+  },
+
+  handleStopTrain: function() {
+    var self = this;
+    if (confirm("Are you sure stop the training?")) {
+      jQuery.ajax({url: '/api/train', method: 'DELETE'}, function(data) {
+        self.setState({status: 'no train'})
+      });
+    }
+  },
+
   getInitialState: function() {
     this.cache = this.cache || {};
-    return {tags: []};
+    return {tags: [], status: 'no train', acc: 0, loss: 0};
   },
 
   shouldLoadTags: function() {
@@ -358,6 +381,7 @@ var Dashboard = React.createClass({
 
   componentDidMount: function() {
     this.cache.tags = this.cache.tags || [];
+    this.loadStatus();
     this.componentDidUpdate();
   },
 
@@ -409,17 +433,34 @@ var Dashboard = React.createClass({
         </tr>
       );
     });
+    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleTrain}> Train </Button>;
+    if (this.state.status == "training") {
+      btn = <Button bsStyle="danger" bsSize="xsmall" onClick={this.handleStopTrain}> Stop </Button>
+    }
     return (
       <div className="dashboard">
-        <h1 className="page-header"> Dashboard </h1>
-        <Row className="train-status">
-          <Col xs={6}>
-            <img src="/api/loss.png" />
-          </Col>
-          <Col xs={6}>
-            <img src="/api/acc.png" />
-          </Col>
-        </Row>
+        <Panel header="Train status" bsStyle="info">
+          <Row>
+            <Col xs={6}>
+              <img src="/api/loss.png" />
+            </Col>
+            <Col xs={6}>
+              <img src="/api/acc.png" />
+            </Col>
+          </Row>
+        </Panel>
+        <Panel>
+          <Row>
+            <Col xs={6} md={4}>Loss: {this.state.loss}</Col>
+            <Col xs={6} md={4}>Accurancy: {this.state.acc}</Col>
+            <Col xs={6} md={4}>
+              <Row>
+                <Col xs={12} md={8}> Status: {this.state.status} </Col>
+                <Col xs={6} md={4}> {btn} </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Panel>
         <h2 class="sub-header">Tags</h2>
         <Table striped bordered condensed hover>
           <thead>

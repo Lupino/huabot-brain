@@ -147,12 +147,20 @@ func caffeTrain() (string, error) {
     return string(result), nil
 }
 
-func caffeTrainStatus() (string, error) {
-    result, err := submit("CAFFE:TRAIN:STATUS", nil)
+func caffeTrainStop() (string, error) {
+    result, err := submit("CAFFE:TRAIN:STOP", nil)
     if err != nil {
         return "", err
     }
     return string(result), nil
+}
+
+func caffeTrainStatus() ([]byte, error) {
+    result, err := submit("CAFFE:TRAIN:STATUS", nil)
+    if err != nil {
+        return nil, err
+    }
+    return result, nil
 }
 
 func caffeTrainPlot(plotType string) ([]byte, error) {
