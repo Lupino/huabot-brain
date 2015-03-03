@@ -338,6 +338,7 @@ func api(mart *martini.ClassicMartini) {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
         }
+        r.Header().Set(render.ContentType, render.ContentJSON)
         r.JSON(http.StatusOK, result)
         return
     })
