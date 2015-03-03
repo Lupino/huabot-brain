@@ -6,6 +6,8 @@ An Image Recognition System build on top of caffe deep learn framework.
 Quick start
 -----------
 
+Please make sure install the requirements.
+
 ### install
 
     go get -v github.com/Lupino/huabot-brain
