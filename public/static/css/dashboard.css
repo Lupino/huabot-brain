@@ -135,3 +135,7 @@ body {
 .dashboard img {
   max-width: 100%;
 }
+
+.demo img {
+  max-width: 320px;
+}
