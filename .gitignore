@@ -11,3 +11,4 @@ public/upload/*
 *.swp
 resourses/logs/*
 !resourses/logs/README.md
+!tools/datasets/*.txt
