@@ -3,6 +3,33 @@ Huabot Brain
 
 An Image Recognition System build on top of caffe deep learn framework.
 
+Quick start
+-----------
+
+### install
+
+    go get -v github.com/Lupino/huabot-brain
+    go get -v github.com/Lupino/huabot-brain/tools/train_worker
+
+### start server
+
+    cd $GOPATH/src/github.com/Lupino/huabot-brain
+    huabot-brain --gearmand=127.0.0.1:4730 --dbpath=dataset.db
+    train_worker --gearmand=127.0.0.1:4730
+
+    env GEARMAND_PORT=tcp://127.0.0.1:4730 python tools/predict_worker/main.py resources
+
+### load datasets
+
+    cd $GOPATH/src/github.com/Lupino/huabot-brain/tools/datasets
+    python get_datasets.py
+
+### open dashboard
+
+Go to <http://127.0.0.1:3000/react.html>
+
+Just click Train button to train the network.
+
 Requirements
 ------------
 
