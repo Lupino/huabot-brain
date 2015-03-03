@@ -9,3 +9,4 @@ Requirements
 * [caffe](http://caffe.berkeleyvision.org/)
 * [Gearman](http://gearman.org)
 * [Python](http://python.org)
+* [golang](http://golang.org)
