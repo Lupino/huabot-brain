@@ -19,7 +19,7 @@ def get_pins(uri):
         rsp = requests.get(url, headers={
             'Accept': 'application/json',
             'User-Agent': 'Huabot/1.0'})
-        pins = rsp.json()['pins']
+        pins = rsp.json().get('pins', [])
         if len(pins) == 0:
             break
 
