@@ -74,7 +74,7 @@ func loadDataset(host string) (err error) {
 
 func caffeTrain() {
     var err error
-    log.Printf("caffeTrain")
+
     if trainLock {
         return
     }
@@ -94,7 +94,6 @@ func caffeTrain() {
     os.RemoveAll(TRAIN_LMDB)
     os.RemoveAll(VAL_LMDB)
 
-
     if err = caffe.ConvertImageset("--resize_height=256", "--shuffle", "--resize_width=256", *UPLOADPATH, TRAIN_FILE, TRAIN_LMDB); err != nil {
         log.Printf("Error: %s\n", err)
         return
@@ -110,10 +109,6 @@ func caffeTrain() {
         return
     }
 
-    if !trainLock {
-        return
-    }
-
     if err = caffe.Run("train", "--solver=" + SOLVER_FILE, "-log_dir=" + LOG_DIR); err != nil {
         log.Printf("Error: %s\n", err)
         return
@@ -126,7 +121,7 @@ func caffeTrainTask(job worker.Job) (data []byte, err error) {
 }
 
 func caffeTrainStopTask(job worker.Job) (data []byte, err error) {
-    run("sh", "-c", "\"ps aux | grep 'caffe train' | grep -v grep | awk '{print \\$2}' | xargs kill\"")
+    caffe.Kill()
     trainLock = false
     return []byte("ok"), nil
 }
