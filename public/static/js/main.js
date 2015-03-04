@@ -131,7 +131,7 @@ var Datasets = React.createClass({
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
-              params={this.getParams()} to="datasets" query={query} block>加载更多...</ButtonLink>
+              params={this.getParams()} to="datasets" query={query} block>Load More...</ButtonLink>
         </div>
       );
     }
@@ -300,9 +300,9 @@ var App = React.createClass({
           <Row>
             <Col sm={3} md={2} className="sidebar">
               <Nav>
-                <NavItemLink to="datasets" params={{dataType: 'all'}}>所有数据</NavItemLink>
-                <NavItemLink to="datasets" params={{dataType: 'train'}}>训练数据</NavItemLink>
-                <NavItemLink to="datasets" params={{dataType: 'val'}}>验证数据</NavItemLink>
+                <NavItemLink to="datasets" params={{dataType: 'all'}}>All Data</NavItemLink>
+                <NavItemLink to="datasets" params={{dataType: 'train'}}>Train Data</NavItemLink>
+                <NavItemLink to="datasets" params={{dataType: 'val'}}>Val Data</NavItemLink>
                 <NavItemLink to="demo">DEMO</NavItemLink>
               </Nav>
             </Col>
@@ -410,7 +410,7 @@ var Dashboard = React.createClass({
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
-              params={this.getParams()} to="dashboard" query={query} block>加载更多...</ButtonLink>
+              params={this.getParams()} to="dashboard" query={query} block>Load More...</ButtonLink>
         </div>
       );
     }
