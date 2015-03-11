@@ -24,7 +24,7 @@ func main() {
     api(mart)
 
     mart.Get("/", func(r render.Render) {
-        data, _ := ioutil.ReadFile("public/react.html")
+        data, _ := ioutil.ReadFile("public/index.html")
         r.Header().Set(render.ContentType, render.ContentHTML)
         r.Data(http.StatusOK, data)
     })

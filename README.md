@@ -29,7 +29,7 @@ Please make sure install the requirements.
 
 ### open dashboard
 
-Go to <http://127.0.0.1:3000/react.html>
+Go to <http://127.0.0.1:3000>
 
 Just click Train button to train the network.
 
