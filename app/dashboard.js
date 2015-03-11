@@ -99,7 +99,7 @@ var Dashboard = React.createClass({
     if (this.cache.tags && this.cache.tags.length > 0) {
       var oldLastTag = this.cache.tags[this.cache.tags.length - 1];
       var lastTag = tags[tags.length - 1];
-      if (oldLastTag.tag_id !== lastTag.tag_id) {
+      if (lastTag && oldLastTag.tag_id !== lastTag.tag_id) {
         this.cache.tags = this.cache.tags.concat(tags);
       }
     } else {

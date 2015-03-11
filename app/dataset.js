@@ -113,7 +113,7 @@ var Datasets = React.createClass({
     if (this.cache.datasets && this.cache.datasets.length > 0) {
       var oldLastDataset = this.cache.datasets[this.cache.datasets.length - 1];
       var lastDataset = datasets[datasets.length - 1];
-      if (oldLastDataset.dataset_id !== lastDataset.dataset_id) {
+      if ( lastDataset && oldLastDataset.dataset_id !== lastDataset.dataset_id) {
         this.cache.datasets = this.cache.datasets.concat(datasets);
       }
     } else {
