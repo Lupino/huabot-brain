@@ -1,0 +1,25 @@
+{
+  "name": "huabot-brain",
+  "version": "1.0.0",
+  "description": "Huabot Brain interface",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Lupino/huabot-brain"
+  },
+  "author": "Li Meng Jun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lupino/huabot-brain/issues"
+  },
+  "homepage": "https://github.com/Lupino/huabot-brain",
+  "dependencies": {
+    "react": "^0.12.2",
+    "react-bootstrap": "^0.16.1",
+    "react-router": "^0.12.4",
+    "react-router-bootstrap": "^0.9.1",
+    "reactify": "^1.0.0"
+  }
+}

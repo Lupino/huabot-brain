@@ -16,6 +16,7 @@ Please make sure install the requirements.
 ### start server
 
     cd $GOPATH/src/github.com/Lupino/huabot-brain
+    make # precompile and package javascript
     huabot-brain --gearmand=127.0.0.1:4730 --dbpath=dataset.db
     train_worker --gearmand=127.0.0.1:4730
 
