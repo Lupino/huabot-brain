@@ -116,11 +116,25 @@ func api(mart *martini.ClassicMartini) {
     mart.Delete(API + "/datasets/(?P<dataset_id>\\d+)/?", func(params martini.Params, r render.Render) {
         datasetId, _ := strconv.Atoi(params["dataset_id"])
         var dataset = new(models.Dataset)
-        if _, err := engine.Id(datasetId).Delete(dataset); err != nil {
+        if has, err := engine.Id(datasetId).Get(dataset); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        } else if has {
+            if _, err := engine.Id(datasetId).Delete(dataset); err != nil {
+                r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            } else {
+                var sql string
+                if dataset.DataType == models.TRAIN {
+                  sql = "update `tag` set `train_count` = `train_count` - 1 where `id` = ?"
+                } else if dataset.DataType == models.VAL {
+                  sql = "update `tag` set `test_count` = `test_count` - 1 where `id` = ?"
+                }
+                engine.Exec(sql, dataset.TagId)
+                r.JSON(http.StatusOK, map[string]string{})
+            }
         } else {
-            r.JSON(http.StatusOK, map[string]string{})
+            r.JSON(http.StatusNotFound, map[string]string{"err": "Dataset not exists."})
         }
+
     })
 
     mart.Get(API + "/datasets/?", func(req *http.Request, r render.Render) {
