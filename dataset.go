@@ -91,7 +91,7 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint, desc string)
         var sql string
         if dataType == models.TRAIN {
           sql = "update `tag` set `train_count` = `train_count` + 1 where `id` = ?"
-        } else {
+        } else if dataType == models.VAL {
           sql = "update `tag` set `test_count` = `test_count` + 1 where `id` = ?"
         }
         engine.Exec(sql, tag.Id)

@@ -46,7 +46,6 @@ type DatasetForm struct {
     TagForm
     DataTypeForm
     Description string `form:"description"`
-
 }
 
 func api(mart *martini.ClassicMartini) {
@@ -83,19 +82,17 @@ func api(mart *martini.ClassicMartini) {
         r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
     })
 
-    mart.Post(API + "/datasets/(?P<dataset_id>\\d+)/?", binding.Bind(DataTypeForm{}), func(form DataTypeForm, params martini.Params, r render.Render) {
+    mart.Post(API + "/datasets/(?P<dataset_id>\\d+)/?", func(req *http.Request, params martini.Params, r render.Render) {
         datasetId, _ := strconv.Atoi(params["dataset_id"])
         var dataset = new(models.Dataset)
         if has, err := engine.Id(datasetId).Get(dataset); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
             dataset.FillObject()
-            if dataset.DataType != form.DataType {
-                dataset.DataType = form.DataType
-                if _, err := engine.Id(datasetId).Update(dataset); err != nil {
-                    r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
-                    return
-                }
+            dataset.Description = req.Form.Get("description")
+            if _, err := engine.Id(datasetId).Update(dataset); err != nil {
+                r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+                return
             }
             r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
         } else {
