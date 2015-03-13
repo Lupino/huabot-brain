@@ -232,6 +232,19 @@ func api(mart *martini.ClassicMartini) {
         }
     })
 
+    mart.Delete(API + "/tags/(?P<tag_id>\\d+)/?", func(params martini.Params, r render.Render) {
+        tagId, _ := strconv.Atoi(params["tag_id"])
+        var tag = new(models.Tag)
+        if has, err := engine.Id(tagId).Get(tag); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+        } else if has {
+            deleteTag(tag.Id)
+            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+        } else {
+            r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
+        }
+    })
+
     mart.Get(API + "/tags/hint/?", func(req *http.Request, r render.Render) {
         var qs = req.URL.Query()
         var word = qs.Get("word")

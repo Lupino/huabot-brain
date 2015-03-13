@@ -80,6 +80,16 @@ func saveTag(realTag string) (tag *models.Tag, err error) {
     return
 }
 
+func deleteTag(tagId int) (err error) {
+    var engine = models.GetEngine()
+    var q = engine.Where("tag_id = ?", tagId)
+    var dataset models.Dataset
+    var tag models.Tag
+    q.Delete(&dataset)
+    engine.Id(tagId).Delete(&tag)
+    return
+}
+
 func saveDataset(file *models.File, tag *models.Tag, dataType uint, desc string) (dataset *models.Dataset, err error) {
     dataset = &models.Dataset{FileId: file.Id, TagId: tag.Id}
     var engine = models.GetEngine()

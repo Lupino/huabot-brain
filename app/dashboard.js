@@ -30,9 +30,28 @@ var Dashboard = React.createClass({
   handleStopTrain: function() {
     var self = this;
     if (confirm("Are you sure stop the training?")) {
-      jQuery.ajax({url: '/api/train', method: 'DELETE'}, function(data) {
+      jQuery.ajax({url: '/api/train', method: 'DELETE'}).done(function() {
         self.setState({status: 'no train'});
       });
+    }
+  },
+
+  handleClickTag: function(evt) {
+    var elem = evt.target;
+    var action = elem.getAttribute("action");
+    var tagId = elem.getAttribute("data-id");
+
+    if (action === 'edit') {
+      var tagName = prompt('Enter tagName...');
+      jQuery.post('/api/tags/' + tagId, {tag: tagName}, function(data) {
+        window.location.reload();
+      });
+    } else if (action === 'delete') {
+      if (confirm("Are you sure?")) {
+        jQuery.ajax({url: '/api/tags/' + tagId, method: 'DELETE'}).done(function() {
+          window.location.reload();
+        });
+      }
     }
   },
 
@@ -112,6 +131,11 @@ var Dashboard = React.createClass({
           <td><Link to="datasets" params={{dataType: 'all'}} query={{tag: tag.name}}>{tag.name}</Link></td>
           <td>{tag.train_count}</td>
           <td>{tag.test_count}</td>
+          <td>
+            <Button bsSize="xsmall" data-id={tag.tag_id} action="edit">Edit</Button>
+            &nbsp;
+            <Button bsStyle="danger" bsSize="xsmall" data-id={tag.tag_id} action="delete">Delete</Button>
+          </td>
         </tr>
       );
     });
@@ -143,14 +167,15 @@ var Dashboard = React.createClass({
             </Col>
           </Row>
         </Panel>
-        <h2 class="sub-header">Tags</h2>
-        <Table striped bordered condensed hover>
+        <h2 className="sub-header">Tags</h2>
+        <Table striped bordered condensed hover onClick={this.handleClickTag}>
           <thead>
             <tr>
               <th>#</th>
               <th>Name</th>
               <th>Train</th>
               <th>Test</th>
+              <th width={100}></th>
             </tr>
           </thead>
           <tbody>
