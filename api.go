@@ -64,7 +64,6 @@ func api(mart *martini.ClassicMartini) {
                 return
             }
         } else {
-            log.Printf("111%v\n", form)
             if file, err = uploadFile(form.File); err != nil {
                 r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
                 return
