@@ -67,7 +67,8 @@ var SearchForm = React.createClass({
     this.props.onSubmit(this.state.value);
   },
 
-  handleListClick: function(eventKey, href, target) {
+  handleListClick: function(evt) {
+    var target = evt.target.innerText.trim();
     this.cache.changed = false;
     this.props.onSubmit(target);
     this.setState({tags: [], value: target});
@@ -75,7 +76,7 @@ var SearchForm = React.createClass({
 
   render: function() {
     var list = this.state.tags.map(function(tag) {
-      return <ListGroupItem target={tag.name}> {tag.name}</ListGroupItem>;
+      return <ListGroupItem> {tag.name} </ListGroupItem>;
     });
     return (
       <form className="navbar-form navbar-right" onSubmit={this.handleSubmit}>
@@ -86,8 +87,8 @@ var SearchForm = React.createClass({
           placeholder="Search..."
           onChange={this.handleChange} />
 
-        <div className="hint">
-          <ListGroup onClick={this.handleListClick}>
+        <div className="hint" onClick={this.handleListClick}>
+          <ListGroup>
             {list}
           </ListGroup>
         </div>
