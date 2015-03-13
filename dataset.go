@@ -13,6 +13,8 @@ import (
     "sync"
     "image"
     "log"
+    "bytes"
+    "errors"
     _ "image/png"
     _ "image/jpeg"
 )
@@ -125,18 +127,19 @@ func submit(funcName string, workload []byte) ([]byte, error) {
         log.Println(e)
     }
     jobHandler := func(resp *client.Response) {
-        if resp.DataType == client.WorkComplate {
-            result, errResult = resp.Result()
-            mutex.Unlock()
-        }
+        result, errResult = resp.Result()
+        mutex.Unlock()
     }
     _, err = c.Do(funcName, workload, client.JobNormal, jobHandler)
     if err != nil {
-        log.Printf("gearman Do %s Error: %s\n", funcName, err)
+        log.Printf("Gearman Doing %s Error: %s\n", funcName, err)
         return nil, err
     }
     mutex.Lock()
     mutex.Lock()
+    if bytes.Equal(result, []byte("error")) {
+        errResult = errors.New("Gearman doing " + funcName + " Error")
+    }
     return result, errResult
 }
 
