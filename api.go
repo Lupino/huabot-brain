@@ -325,7 +325,7 @@ func api(mart *martini.ClassicMartini) {
     mart.Get(API + "/loss.png", func(r render.Render) {
         result, err := caffeTrainPlot("loss")
         if err != nil {
-            r.Data(http.StatusInternalServerError, nil)
+            r.Redirect("/static/images/loading.png")
             return
         }
         r.Data(http.StatusOK, result)
@@ -335,7 +335,7 @@ func api(mart *martini.ClassicMartini) {
     mart.Get(API + "/acc.png", func(r render.Render) {
         result, err := caffeTrainPlot("acc")
         if err != nil {
-            r.Data(http.StatusInternalServerError, nil)
+            r.Redirect("/static/images/loading.png")
             return
         }
         r.Data(http.StatusOK, result)
