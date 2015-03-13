@@ -4,6 +4,8 @@ var SearchForm = React.createClass({
   getInitialState: function() {
     var query = this.getQuery();
     this.cache = this.cache || {};
+    this.cache.changed = true;
+    this.cache.path = this.getPath();
 
     return {
       value: query.tag || '',
