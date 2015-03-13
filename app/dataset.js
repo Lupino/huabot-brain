@@ -184,6 +184,9 @@ var NewDataset = React.createClass({
 
   handleToggle: function() {
     this.props.onRequestHide();
+    if (this.state.dataset) {
+      window.location.reload();
+    }
   },
 
   handleDataTypeClick: function(evt) {
@@ -214,7 +217,6 @@ var NewDataset = React.createClass({
         <div className="img" data-id={this.state.dataset.dataset_id}>
           <div className="dataset">
             <img src={"/upload/" + this.state.dataset.file.key} />
-            <div className="tag">{this.state.dataset.tag.name}</div>
           </div>
         </div>
       );
