@@ -15,7 +15,7 @@ all: $(APP)
 $(APP): comibed.js
 	browserify -t [ reactify --es6 ] comibed.js | uglifyjs -m -r '$$' > $@
 
-comibed.js: $(JSX_SOURCE)
+comibed.js: $(HEAD) $(JSX_SOURCE) $(TAIL)
 	cat $(HEAD) $(JSX_SOURCE) $(TAIL) > comibed.js
 
 
