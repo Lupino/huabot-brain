@@ -139,3 +139,31 @@ body {
 .demo img {
   max-width: 320px;
 }
+
+.fileForm form {
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+.new-dataset .imgBox {
+  width: 136px;
+  height: 136px;
+}
+
+.new-dataset .desc {
+  height: 69px;
+}
+
+.dataType {
+  width: 250px;
+  position: absolute;
+}
+
+.dataType .form-group {
+  margin: 0;
+}
+
+.dataset img {
+  max-width: 100%;
+}

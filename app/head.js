@@ -14,6 +14,9 @@ var Panel = require('react-bootstrap/lib/Panel');
 var ListGroup = require('react-bootstrap/lib/ListGroup');
 var ListGroupItem = require('react-bootstrap/lib/ListGroupItem');
 var Table = require('react-bootstrap/lib/Table');
+var Glyphicon = require('react-bootstrap/lib/Glyphicon');
+var NavItem = require('react-bootstrap/lib/NavItem');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var NavItemLink = require('react-router-bootstrap/lib/NavItemLink');
 var ButtonLink = require('react-router-bootstrap/lib/ButtonLink');

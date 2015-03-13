@@ -1,9 +1,9 @@
 var App = React.createClass({
-  mixins: [State, Navigation],
+  mixins: [State, Navigation, OverlayMixin],
 
   getInitialState: function() {
     var tag = this.getQuery().tag || '';
-    return {tag: tag};
+    return {tag: tag, isModalOpen: false};
   },
 
   handleSubmit: function(tag) {
@@ -17,12 +17,28 @@ var App = React.createClass({
     this.setState({tag: tag || ''});
   },
 
+  handleToggle: function (evt) {
+    this.setState({
+      isModalOpen: !this.state.isModalOpen
+    });
+  },
+
+ // This is called by the `OverlayMixin` when this component
+  // is mounted or updated and the return value is appended to the body.
+  renderOverlay: function () {
+    if (!this.state.isModalOpen) {
+      return <span />;
+    }
+
+    return <NewDataset onRequestHide={this.handleToggle} />;
+  },
   render: function() {
     return (
       <div className="app-main">
         <Navbar fixedTop inverse fluid brand="Huabot Brain">
           <Nav right>
             <NavItemLink to="dashboard">Dashboard</NavItemLink>
+            <NavItem onClick={this.handleToggle} href={null}><Glyphicon glyph="plus" /></NavItem>
           </Nav>
           <SearchForm onSubmit={this.handleSubmit} />
         </Navbar>
@@ -45,4 +61,3 @@ var App = React.createClass({
     );
   }
 });
-

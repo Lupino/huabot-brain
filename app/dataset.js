@@ -146,3 +146,138 @@ var Datasets = React.createClass({
     );
   }
 });
+
+var NewDataset = React.createClass({
+
+  handleClick: function() {
+    $(this.refs.file.getDOMNode()).click();
+  },
+
+  getInitialState: function() {
+    return {
+      file: null,
+      dataset: null
+    };
+  },
+
+  componentDidMount: function () {
+    var self = this;
+    $(".fileForm").ajaxForm(function(result) {
+      self.setState(result);
+    });
+  },
+
+  handleFile: function() {
+    $(this.refs.fileForm.getDOMNode()).submit();
+  },
+
+  handleToggle: function() {
+    this.props.onRequestHide();
+  },
+
+  handleDataTypeClick: function(evt) {
+    var dataType = evt.target.value;
+    this.setState({data_type: dataType});
+  },
+
+  handleSave: function() {
+    var self = this;
+    var file_id = this.state.file.file_id;
+    var tag = this.refs.tag.getValue();
+    var desc = this.refs.desc.getValue();
+    var dataType = this.state.data_type;
+    if (!tag) {
+      alert("Tag is required.");
+    }
+    jQuery.post("/api/datasets", {tag: tag, file_id: file_id, description: desc, data_type: dataType}, function(data) {
+      self.setState(data);
+    });
+  },
+
+  render: function() {
+    var action = this.props.action || '/api/upload';
+    var fileForm, saveBtn, mainBody, dataType;
+
+    if (this.state.dataset) {
+      var mainBody = (
+        <div className="img" data-id={this.state.dataset.dataset_id}>
+          <div className="dataset">
+            <img src={"/upload/" + this.state.dataset.file.key} />
+            <div className="tag">{this.state.dataset.tag.name}</div>
+          </div>
+        </div>
+      );
+    } else if (this.state.file) {
+      saveBtn = <Button bsStyle="primary" onClick={this.handleSave}>Save</Button>;
+      var height, width;
+      var boxStyle = {};
+      if (this.state.file.width > this.state.file.height) {
+        width = 136;
+        height = this.state.file.height / this.state.file.width * width;
+      } else {
+        height = 136;
+        width = this.state.file.width / this.state.file.height * height;
+      }
+      boxStyle.paddingTop = (136 - height) / 2;
+      boxStyle.paddingLeft = (136 - width) / 2;
+
+      mainBody = (
+        <Row className="new-dataset">
+          <Col xs={6} md={4}>
+            <Panel>
+              <div className="imgBox" style={boxStyle}>
+                <img src={"/upload/" + this.state.file.key} width={width} height={height} />
+              </div>
+             </Panel>
+          </Col>
+          <Col xs={12} md={8}>
+            <form ref="datasetForm" encType="multipart/form-data">
+              <Input ref="tag" type="text" label="Tag:" />
+              <Input ref="desc" type="textarea" label="Description:" className="desc" />
+            </form>
+          </Col>
+        </Row>
+      );
+
+      dataType = (
+        <div className="dataType">
+          <Row>
+            <Col xs={6} md={4}>
+              <Input type="radio" label="Candidate" name="data_type" value={0} onClick={this.handleDataTypeClick}  />
+            </Col>
+            <Col xs={6} md={4}>
+              <Input type="radio" label="Train" name="data_type" value={1} onClick={this.handleDataTypeClick}  />
+            </Col>
+            <Col xs={6} md={4}>
+              <Input type="radio" label="Val"  name="data_type" value={2} onClick={this.handleDataTypeClick} />
+            </Col>
+          </Row>
+        </div>
+
+      );
+
+    } else {
+      fileForm = (
+        <div className="fileForm">
+          <Button bsStyle="primary" bsSize="large" block onClick={this.handleClick}>Choose file...</Button>
+          <form ref="fileForm" encType="multipart/form-data" method="POST" action={action}>
+            <input ref="file" type="file" name="file" onChange={this.handleFile} />
+          </form>
+        </div>
+      );
+    }
+    return (
+        <Modal bsStyle="primary" title="Add new Dataset" onRequestHide={this.handleToggle}>
+          <div className="modal-body">
+            {fileForm}
+            {mainBody}
+          </div>
+          <div className="modal-footer">
+            {dataType}
+            <Button onClick={this.handleToggle}>{this.state.dataset ? "Close" : "Cancel"}</Button>
+            {saveBtn}
+          </div>
+        </Modal>
+      );
+  }
+});
