@@ -1,17 +1,28 @@
 var Dataset = React.createClass({
+  handleDelete: function() {
+    var self = this;
+    jQuery.ajax({
+      method: 'DELETE',
+      url: '/api/datasets/' + this.props.data.dataset_id
+    }).done(function() {
+      alert('Success.');
+      self.props.onRequestHide();
+      window.location.reload();
+    });
+  },
   render: function() {
     var dataset = this.props.data;
     return (
-      <Modal {...this.props} title="View" animation={false}>
+      <Modal {...this.props} title={dataset.tag.name} animation={false}>
         <div className="modal-body">
           <div className="img" data-id={dataset.dataset_id}>
             <div className="dataset">
               <img src={"/upload/" + dataset.file.key} />
-              <div className="tag">{dataset.tag.name}</div>
             </div>
           </div>
         </div>
         <div className="modal-footer">
+          <Button bsStyle="danger" onClick={this.handleDelete}>Delete</Button>
           <Button onClick={this.props.onRequestHide}>Close</Button>
         </div>
       </Modal>
