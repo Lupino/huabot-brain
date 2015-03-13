@@ -14,7 +14,8 @@ import (
 
 
 type FileForm struct {
-    File *multipart.FileHeader `form:"file" binding:"required"`
+    File *multipart.FileHeader `form:"file"`
+    FileId int                 `form:"file_id"`
 }
 
 type PredictForm struct {
@@ -44,6 +45,7 @@ type DatasetForm struct {
     FileForm
     TagForm
     DataTypeForm
+    Description string `form:"description"`
 
 }
 
@@ -55,16 +57,28 @@ func api(mart *martini.ClassicMartini) {
         var tag *models.Tag
         var dataset *models.Dataset
 
-        if file, err = uploadFile(form.File); err != nil {
-            r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+        if form.FileId > 0 {
+            file = &models.File{Id: form.FileId}
+            if has, _ := engine.Get(file); !has {
+                r.JSON(http.StatusOK, map[string]interface{}{"err": "file not exists."})
+                return
+            }
+        } else {
+            log.Printf("111%v\n", form)
+            if file, err = uploadFile(form.File); err != nil {
+                r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+                return
+            }
         }
 
         if tag, err = saveTag(form.Tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+            return
         }
 
-        if dataset, err = saveDataset(file, tag, form.DataType); err != nil {
+        if dataset, err = saveDataset(file, tag, form.DataType, form.Description); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+            return
         }
 
         r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})

@@ -28,13 +28,14 @@ type Tag struct {
 
 
 type Dataset struct {
-    Id        int       `xorm:"pk autoincr"           json:"dataset_id,omitempty"`
-    TagId     int       `xorm:"unique(tag_file)"      json:"tag_id,omitempty"`
-    Tag       *Tag      `xorm:"-"                     json:"tag,omitempty"`
-    FileId    int       `xorm:"unique(tag_file)"      json:"file_id,omitempty"`
-    File      *File     `xorm:"-"                     json:"file,omitempty"`
-    DataType  uint      `xorm:"tinyint(1) default(0)" json:"data_type,omitempty"`
-    CreatedAt time.Time `xorm:"created"               json:"created_at,omitempty"`
+    Id          int       `xorm:"pk autoincr"           json:"dataset_id,omitempty"`
+    TagId       int       `xorm:"unique(tag_file)"      json:"tag_id,omitempty"`
+    Tag         *Tag      `xorm:"-"                     json:"tag,omitempty"`
+    FileId      int       `xorm:"unique(tag_file)"      json:"file_id,omitempty"`
+    File        *File     `xorm:"-"                     json:"file,omitempty"`
+    DataType    uint      `xorm:"tinyint(1) default(0)" json:"data_type,omitempty"`
+    Description string    `xorm:"varchar(256)"          json:"description,omitempty"`
+    CreatedAt   time.Time `xorm:"created"               json:"created_at,omitempty"`
 }
 
 func (dataset *Dataset) FillObject() (err error) {
