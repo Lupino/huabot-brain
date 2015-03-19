@@ -104,6 +104,9 @@ var DEMO = React.createClass({
             <Input type="url" name="img_url" ref="imgUrl" />
           </form>
         </Panel>
+        <Alert bsStyle="warning">
+          <p>This is a demo for predict image's tags use the pretrained model and the predict worker.</p>
+        </Alert>
         {this.renderResult()}
       </div>
     );
