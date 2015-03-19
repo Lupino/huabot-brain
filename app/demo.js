@@ -19,8 +19,6 @@ var DEMO = React.createClass({
   },
 
   componentDidMount: function() {
-    this.cache.imgUrl = 'http://img.hb.aicdn.com/d3a5039f151ddf451b95ea1b9b7e6af73f189c3a5f23-MMFBG3_fw320';
-    this.predict(this.cache.imgUrl);
     this.componentDidUpdate();
   },
 
