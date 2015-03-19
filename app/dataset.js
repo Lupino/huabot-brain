@@ -5,9 +5,8 @@ var Dataset = React.createClass({
       method: 'DELETE',
       url: '/api/datasets/' + this.props.data.dataset_id
     }).done(function() {
-      alert('Success.');
+      self.props.onRemove(self.props.data.dataset_id);
       self.props.onRequestHide();
-      window.location.reload();
     });
   },
   render: function() {
@@ -55,6 +54,16 @@ var Datasets = React.createClass({
     jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType + '&tag=' + tag, function(data) {
       self.setState(data);
     });
+  },
+
+  handleRemoveDataset: function(datasetId) {
+    this.cache.datasets = this.cache.datasets.filter(function(dataset) {
+      if (dataset.dataset_id === datasetId) {
+        return false;
+      }
+      return true;
+    });
+    this.setState({removeDataset: datasetId, datasets: []});
   },
 
   getInitialState: function() {
@@ -108,6 +117,7 @@ var Datasets = React.createClass({
   },
 
   render: function() {
+    var self = this;
     var datasets = this.state.datasets || [];
     var loadMore;
     if (datasets.length >= this.limit) {
@@ -137,7 +147,8 @@ var Datasets = React.createClass({
         height = 600;
       }
       return (
-        <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name} />}>
+        <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name}
+            onRemove={self.handleRemoveDataset} />}>
           <div className="dataset" data-id={dataset.dataset_id}>
             <div className="file" style={{width: width, height: height}}>
               <img src={"/upload/" + dataset.file.key} />
