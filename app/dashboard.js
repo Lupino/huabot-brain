@@ -16,7 +16,10 @@ var Dashboard = React.createClass({
   loadStatus: function() {
     var self = this;
     jQuery.get('/api/train', function(data) {
+      data.trainWorker = true;
       self.setState(data);
+    }).fail(function() {
+      self.setState({trainWorker: false});
     });
   },
 
@@ -24,6 +27,8 @@ var Dashboard = React.createClass({
     var self = this;
     jQuery.post('/api/train', function(data) {
       self.setState({status: 'training', loss: 0, acc: 0});
+    }).fail(function() {
+      alert("Error: please make sure the train worker is started.");
     });
   },
 
@@ -32,6 +37,8 @@ var Dashboard = React.createClass({
     if (confirm("Are you sure stop the training?")) {
       jQuery.ajax({url: '/api/train', method: 'DELETE'}).done(function() {
         self.setState({status: 'no train'});
+      }).fail(function() {
+        alert("Error: please make sure the train worker is started.");
       });
     }
   },
@@ -78,7 +85,8 @@ var Dashboard = React.createClass({
 
   getInitialState: function() {
     this.cache = this.cache || {};
-    return {tags: [], status: 'no train', acc: 0, loss: 0, removeTag: false, updateTag: false};
+    return {tags: [], status: 'no train', acc: 0, loss: 0,
+            removeTag: false, updateTag: false, trainWorker: false};
   },
 
   shouldLoadTags: function() {
@@ -122,6 +130,46 @@ var Dashboard = React.createClass({
     }
   },
 
+  renderTrain: function() {
+    if (!this.state.trainWorker) {
+      return (
+        <Alert bsStyle="warning">
+          Please start train worker to enable train.
+        </Alert>
+      );
+    }
+    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleTrain}> Train </Button>;
+    if (this.state.status == "training") {
+      btn = <Button bsStyle="danger" bsSize="xsmall" onClick={this.handleStopTrain}> Stop </Button>
+    }
+    return (
+      <div className="train">
+        <Panel header="Train status" bsStyle="info">
+          <Row>
+            <Col xs={6}>
+              <img src="/api/loss.png" />
+            </Col>
+            <Col xs={6}>
+              <img src="/api/acc.png" />
+            </Col>
+          </Row>
+        </Panel>
+        <Panel>
+          <Row>
+            <Col xs={6} md={4}>Loss: {this.state.loss}</Col>
+            <Col xs={6} md={4}>Accurancy: {this.state.acc}</Col>
+            <Col xs={6} md={4}>
+              <Row>
+                <Col xs={12} md={8}> Status: {this.state.status} </Col>
+                <Col xs={6} md={4}> {btn} </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Panel>
+      </div>
+    );
+  },
+
   render: function() {
     var tags = this.state.tags || [];
     var loadMore;
@@ -160,34 +208,9 @@ var Dashboard = React.createClass({
         </tr>
       );
     });
-    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleTrain}> Train </Button>;
-    if (this.state.status == "training") {
-      btn = <Button bsStyle="danger" bsSize="xsmall" onClick={this.handleStopTrain}> Stop </Button>
-    }
     return (
       <div className="dashboard">
-        <Panel header="Train status" bsStyle="info">
-          <Row>
-            <Col xs={6}>
-              <img src="/api/loss.png" />
-            </Col>
-            <Col xs={6}>
-              <img src="/api/acc.png" />
-            </Col>
-          </Row>
-        </Panel>
-        <Panel>
-          <Row>
-            <Col xs={6} md={4}>Loss: {this.state.loss}</Col>
-            <Col xs={6} md={4}>Accurancy: {this.state.acc}</Col>
-            <Col xs={6} md={4}>
-              <Row>
-                <Col xs={12} md={8}> Status: {this.state.status} </Col>
-                <Col xs={6} md={4}> {btn} </Col>
-              </Row>
-            </Col>
-          </Row>
-        </Panel>
+        {this.renderTrain()}
         <h2 className="sub-header">Tags</h2>
         <Table striped bordered condensed hover onClick={this.handleClickTag}>
           <thead>
