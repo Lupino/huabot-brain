@@ -5,6 +5,8 @@ var DEMO = React.createClass({
     var self = this;
     jQuery.post('/api/predict', {img_url: img_url}, function(data) {
       self.setState(data);
+    }).fail(function() {
+      alert("Error: please make sure the predict worker is started.");
     });
 
   },
