@@ -44,7 +44,11 @@ var DEMO = React.createClass({
     window.location.href = href;
   },
 
-  render: function() {
+  renderResult: function() {
+    if (!this.state.bet_result || this.state.bet_result.length === 0) {
+      return;
+    }
+
     var elems = this.state.bet_result.map(function(result) {
       var tag = result.tag;
       return (
@@ -66,36 +70,41 @@ var DEMO = React.createClass({
       time = this.state.time + ' s';
     }
 
+
+    return (
+      <Row className="result">
+        <Col xs={6}>
+          {image}
+        </Col>
+        <Col xs={6}>
+          <Panel> Spend time: {time} </Panel>
+          <Table striped bordered condensed hover>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tag</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {elems}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+    );
+  },
+
+  render: function() {
     return (
       <div className="dashboard demo">
-        <Well>
+        <Panel>
           <h4>Enter an image url then predict tags.</h4>
           <form onSubmit={this.handleSubmit}>
             <Input type="url" name="img_url" ref="imgUrl" />
           </form>
-        </Well>
-        <Row className="result">
-          <Col xs={6}>
-            {image}
-          </Col>
-          <Col xs={6}>
-            <Panel> Spend time: {time} </Panel>
-            <Table striped bordered condensed hover>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Tag</th>
-                  <th>Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {elems}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-        <br />
-        <br />
+        </Panel>
+        {this.renderResult()}
       </div>
     );
   }

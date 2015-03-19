@@ -17,6 +17,7 @@ var Table = require('react-bootstrap/lib/Table');
 var Glyphicon = require('react-bootstrap/lib/Glyphicon');
 var NavItem = require('react-bootstrap/lib/NavItem');
 var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
+var Alert = require('react-bootstrap/lib/Alert');
 
 var NavItemLink = require('react-router-bootstrap/lib/NavItemLink');
 var ButtonLink = require('react-router-bootstrap/lib/ButtonLink');
