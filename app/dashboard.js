@@ -39,17 +39,38 @@ var Dashboard = React.createClass({
   handleClickTag: function(evt) {
     var elem = evt.target;
     var action = elem.getAttribute("action");
-    var tagId = elem.getAttribute("data-id");
+    var tagId = Number(elem.getAttribute("data-id"));
+    var self = this;
 
     if (action === 'edit') {
-      var tagName = prompt('Enter tagName...');
+      var tagName = prompt('Enter tag:');
       jQuery.post('/api/tags/' + tagId, {tag: tagName}, function(data) {
-        window.location.reload();
+        if (data.err) {
+          alert(data.err);
+          return;
+        }
+
+        self.cache.tags = self.cache.tags.map(function(tag) {
+          if (tag.tag_id === tagId) {
+            tag.name = tagName;
+          }
+          return tag;
+        });
+
+        self.setState({updateTag: tagId, tags: []});
       });
     } else if (action === 'delete') {
       if (confirm("Are you sure?")) {
         jQuery.ajax({url: '/api/tags/' + tagId, method: 'DELETE'}).done(function() {
-          window.location.reload();
+          self.cache.tags = self.cache.tags.filter(function(tag) {
+            if (tag.tag_id === tagId) {
+              return false;
+            }
+            return true;
+          });
+          self.setState({removeTag: tagId, tags: []});
+        }).fail(function() {
+          alert("Error: Not Found.");
         });
       }
     }
@@ -57,7 +78,7 @@ var Dashboard = React.createClass({
 
   getInitialState: function() {
     this.cache = this.cache || {};
-    return {tags: [], status: 'no train', acc: 0, loss: 0};
+    return {tags: [], status: 'no train', acc: 0, loss: 0, removeTag: false, updateTag: false};
   },
 
   shouldLoadTags: function() {
