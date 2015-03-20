@@ -7,5 +7,4 @@ import (
 var (
     API = "/api"
     GEARMAND = flag.String("gearmand", "127.0.0.1:4730", "The Gearmand server.")
-    UPLOADPATH = flag.String("datasets", "public/upload/", "The datasets path.")
 )

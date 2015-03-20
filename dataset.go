@@ -3,20 +3,12 @@ package main
 import (
     "github.com/Lupino/huabot-brain/backend"
     "github.com/mikespook/gearman-go/client"
-    "mime/multipart"
-    "crypto/sha1"
-    "io"
-    "os"
-    "encoding/hex"
     "encoding/json"
     "fmt"
     "sync"
-    "image"
     "log"
     "bytes"
     "errors"
-    _ "image/png"
-    _ "image/jpeg"
 )
 
 type PredictTag struct {
@@ -28,89 +20,6 @@ type PredictResult struct {
     BetResult []PredictTag `json:"bet_result,omitempty"`
     Time  float64          `json:"time,omitempty"`
     Error string           `json:"err,omitempty"`
-}
-
-func uploadFile(realFile *multipart.FileHeader) (file *backend.File, err error) {
-    var source multipart.File
-    if source, err = realFile.Open(); err != nil {
-        return
-    }
-    defer source.Close()
-    var img image.Config
-    if img, _, err = image.DecodeConfig(source); err != nil {
-        return
-    }
-    source.Seek(0, 0)
-    hasher := sha1.New()
-    io.Copy(hasher, source)
-    fileKey := hex.EncodeToString(hasher.Sum(nil))
-    file = &backend.File{Key: fileKey}
-    var engine = backend.GetEngine()
-    has, _ := engine.Get(file)
-    if !has {
-        var dst *os.File
-        if dst, err = os.Create(*UPLOADPATH + fileKey); err != nil {
-            return
-        }
-        defer dst.Close()
-        source.Seek(0, 0)
-        if _, err = io.Copy(dst, source); err != nil {
-            return
-        }
-
-        file.Width = img.Width
-        file.Height = img.Height
-
-        if _, err = engine.Insert(file); err != nil {
-            return
-        }
-    }
-    return
-}
-
-func saveTag(realTag string) (tag *backend.Tag, err error) {
-    tag = &backend.Tag{Name: realTag}
-    var engine = backend.GetEngine()
-    has, _ := engine.Get(tag)
-    if !has {
-        if _, err = engine.Insert(tag); err != nil {
-            return
-        }
-    }
-    return
-}
-
-func deleteTag(tagId int) (err error) {
-    var engine = backend.GetEngine()
-    var q = engine.Where("tag_id = ?", tagId)
-    var dataset backend.Dataset
-    var tag backend.Tag
-    q.Delete(&dataset)
-    engine.Id(tagId).Delete(&tag)
-    return
-}
-
-func saveDataset(file *backend.File, tag *backend.Tag, dataType uint, desc string) (dataset *backend.Dataset, err error) {
-    dataset = &backend.Dataset{FileId: file.Id, TagId: tag.Id}
-    var engine = backend.GetEngine()
-    has, _ := engine.Get(dataset)
-    if !has {
-        dataset.DataType = dataType
-        dataset.Description = desc
-        if _, err = engine.Insert(dataset); err != nil {
-            return
-        }
-        var sql string
-        if dataType == backend.TRAIN {
-          sql = "update `tag` set `train_count` = `train_count` + 1 where `id` = ?"
-        } else if dataType == backend.VAL {
-          sql = "update `tag` set `test_count` = `test_count` + 1 where `id` = ?"
-        }
-        engine.Exec(sql, tag.Id)
-    }
-    dataset.File = file
-    dataset.Tag = tag
-    return
 }
 
 func loadDataset(dataType uint) (text string, err error) {

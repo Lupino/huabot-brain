@@ -63,18 +63,18 @@ func api(mart *martini.ClassicMartini) {
                 return
             }
         } else {
-            if file, err = uploadFile(form.File); err != nil {
+            if file, err = backend.UploadFile(form.File); err != nil {
                 r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
                 return
             }
         }
 
-        if tag, err = saveTag(form.Tag); err != nil {
+        if tag, err = backend.SaveTag(form.Tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
             return
         }
 
-        if dataset, err = saveDataset(file, tag, form.DataType, form.Description); err != nil {
+        if dataset, err = backend.SaveDataset(file, tag, form.DataType, form.Description); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
             return
         }
@@ -197,7 +197,7 @@ func api(mart *martini.ClassicMartini) {
         var err error
         var file *backend.File
 
-        if file, err = uploadFile(form.File); err != nil {
+        if file, err = backend.UploadFile(form.File); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
@@ -208,7 +208,7 @@ func api(mart *martini.ClassicMartini) {
         var err error
         var tag *backend.Tag
 
-        if tag, err = saveTag(form.Tag); err != nil {
+        if tag, err = backend.SaveTag(form.Tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
@@ -252,7 +252,7 @@ func api(mart *martini.ClassicMartini) {
         if has, err := engine.Id(tagId).Get(tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
-            deleteTag(tag.Id)
+            backend.DeleteTag(tag.Id)
             r.JSON(http.StatusOK, map[string]*backend.Tag{"tag": tag})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
