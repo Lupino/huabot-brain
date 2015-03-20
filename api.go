@@ -4,7 +4,7 @@ import (
     "github.com/go-martini/martini"
     "github.com/martini-contrib/render"
     "github.com/martini-contrib/binding"
-    "github.com/Lupino/huabot-brain/models"
+    "github.com/Lupino/huabot-brain/backend"
     "mime/multipart"
     "strconv"
     "net/http"
@@ -49,15 +49,15 @@ type DatasetForm struct {
 }
 
 func api(mart *martini.ClassicMartini) {
-    var engine = models.GetEngine()
+    var engine = backend.GetEngine()
     mart.Post(API + "/datasets/?", binding.Bind(DatasetForm{}), func(form DatasetForm, r render.Render) {
         var err error
-        var file *models.File
-        var tag *models.Tag
-        var dataset *models.Dataset
+        var file *backend.File
+        var tag *backend.Tag
+        var dataset *backend.Dataset
 
         if form.FileId > 0 {
-            file = &models.File{Id: form.FileId}
+            file = &backend.File{Id: form.FileId}
             if has, _ := engine.Get(file); !has {
                 r.JSON(http.StatusOK, map[string]interface{}{"err": "file not exists."})
                 return
@@ -79,12 +79,12 @@ func api(mart *martini.ClassicMartini) {
             return
         }
 
-        r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
+        r.JSON(http.StatusOK, map[string]*backend.Dataset{"dataset": dataset})
     })
 
     mart.Post(API + "/datasets/(?P<dataset_id>\\d+)/?", func(req *http.Request, params martini.Params, r render.Render) {
         datasetId, _ := strconv.Atoi(params["dataset_id"])
-        var dataset = new(models.Dataset)
+        var dataset = new(backend.Dataset)
         if has, err := engine.Id(datasetId).Get(dataset); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
@@ -94,7 +94,7 @@ func api(mart *martini.ClassicMartini) {
                 r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
                 return
             }
-            r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
+            r.JSON(http.StatusOK, map[string]*backend.Dataset{"dataset": dataset})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Dataset not exists."})
         }
@@ -102,12 +102,12 @@ func api(mart *martini.ClassicMartini) {
 
     mart.Get(API + "/datasets/(?P<dataset_id>\\d+)/?", func(params martini.Params, r render.Render) {
         datasetId, _ := strconv.Atoi(params["dataset_id"])
-        var dataset = new(models.Dataset)
+        var dataset = new(backend.Dataset)
         if has, err := engine.Id(datasetId).Get(dataset); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
             dataset.FillObject()
-            r.JSON(http.StatusOK, map[string]*models.Dataset{"dataset": dataset})
+            r.JSON(http.StatusOK, map[string]*backend.Dataset{"dataset": dataset})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Dataset not exists."})
         }
@@ -115,7 +115,7 @@ func api(mart *martini.ClassicMartini) {
 
     mart.Delete(API + "/datasets/(?P<dataset_id>\\d+)/?", func(params martini.Params, r render.Render) {
         datasetId, _ := strconv.Atoi(params["dataset_id"])
-        var dataset = new(models.Dataset)
+        var dataset = new(backend.Dataset)
         if has, err := engine.Id(datasetId).Get(dataset); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
@@ -123,9 +123,9 @@ func api(mart *martini.ClassicMartini) {
                 r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             } else {
                 var sql string
-                if dataset.DataType == models.TRAIN {
+                if dataset.DataType == backend.TRAIN {
                   sql = "update `tag` set `train_count` = `train_count` - 1 where `id` = ?"
-                } else if dataset.DataType == models.VAL {
+                } else if dataset.DataType == backend.VAL {
                   sql = "update `tag` set `test_count` = `test_count` - 1 where `id` = ?"
                 }
                 engine.Exec(sql, dataset.TagId)
@@ -157,14 +157,14 @@ func api(mart *martini.ClassicMartini) {
 
         var tagName = qs.Get("tag")
 
-        var datasets = make([]models.Dataset, 0)
+        var datasets = make([]backend.Dataset, 0)
         var q = engine.Desc("id")
         if max > -1 {
             q = q.Where("id < ?", max)
         }
 
         if tagName != "" {
-            tag := &models.Tag{Name: tagName}
+            tag := &backend.Tag{Name: tagName}
             has, _ := engine.Get(tag)
             if !has {
                 r.JSON(http.StatusNotFound,
@@ -175,9 +175,9 @@ func api(mart *martini.ClassicMartini) {
         }
 
         if dataType == "train" {
-            q = q.And("data_type = ?", models.TRAIN)
+            q = q.And("data_type = ?", backend.TRAIN)
         } else if dataType == "val" {
-            q = q.And("data_type = ?", models.VAL)
+            q = q.And("data_type = ?", backend.VAL)
         }
 
         q = q.Limit(limit)
@@ -190,34 +190,34 @@ func api(mart *martini.ClassicMartini) {
             datasets[idx] = dataset
         }
 
-        r.JSON(http.StatusOK, map[string][]models.Dataset{"datasets": datasets})
+        r.JSON(http.StatusOK, map[string][]backend.Dataset{"datasets": datasets})
     })
 
     mart.Post(API + "/upload/?", binding.Bind(FileForm{}), func(form FileForm, r render.Render) {
         var err error
-        var file *models.File
+        var file *backend.File
 
         if file, err = uploadFile(form.File); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        r.JSON(http.StatusOK, map[string]*models.File{"file": file})
+        r.JSON(http.StatusOK, map[string]*backend.File{"file": file})
     })
 
     mart.Post(API + "/tags/?", binding.Bind(TagForm{}), func(form TagForm, r render.Render) {
         var err error
-        var tag *models.Tag
+        var tag *backend.Tag
 
         if tag, err = saveTag(form.Tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
         }
 
-        r.JSON(http.StatusOK, map[string]*models.Tag{"file": tag})
+        r.JSON(http.StatusOK, map[string]*backend.Tag{"file": tag})
     })
 
     mart.Post(API + "/tags/(?P<tag_id>\\d+)/?", binding.Bind(TagForm{}), func(form TagForm, params martini.Params, r render.Render) {
         tagId, _ := strconv.Atoi(params["tag_id"])
-        var tag = new(models.Tag)
+        var tag = new(backend.Tag)
         if has, err := engine.Id(tagId).Get(tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
@@ -228,7 +228,7 @@ func api(mart *martini.ClassicMartini) {
                     return
                 }
             }
-            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+            r.JSON(http.StatusOK, map[string]*backend.Tag{"tag": tag})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
         }
@@ -236,11 +236,11 @@ func api(mart *martini.ClassicMartini) {
 
     mart.Get(API + "/tags/(?P<tag_id>\\d+)/?", func(params martini.Params, r render.Render) {
         tagId, _ := strconv.Atoi(params["tag_id"])
-        var tag = new(models.Tag)
+        var tag = new(backend.Tag)
         if has, err := engine.Id(tagId).Get(tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
-            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+            r.JSON(http.StatusOK, map[string]*backend.Tag{"tag": tag})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
         }
@@ -248,12 +248,12 @@ func api(mart *martini.ClassicMartini) {
 
     mart.Delete(API + "/tags/(?P<tag_id>\\d+)/?", func(params martini.Params, r render.Render) {
         tagId, _ := strconv.Atoi(params["tag_id"])
-        var tag = new(models.Tag)
+        var tag = new(backend.Tag)
         if has, err := engine.Id(tagId).Get(tag); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         } else if has {
             deleteTag(tag.Id)
-            r.JSON(http.StatusOK, map[string]*models.Tag{"tag": tag})
+            r.JSON(http.StatusOK, map[string]*backend.Tag{"tag": tag})
         } else {
             r.JSON(http.StatusNotFound, map[string]string{"err": "Tag not exists."})
         }
@@ -265,10 +265,10 @@ func api(mart *martini.ClassicMartini) {
         var q = engine.Desc("id")
         q = q.And("name like \"%" + word + "%\"")
         q = q.Limit(5)
-        var tags = make([]models.Tag, 0)
+        var tags = make([]backend.Tag, 0)
         var err = q.Find(&tags)
         log.Printf("err: %s\n", err)
-        r.JSON(http.StatusOK, map[string][]models.Tag{"tags": tags})
+        r.JSON(http.StatusOK, map[string][]backend.Tag{"tags": tags})
     })
 
     mart.Get(API + "/tags/?", func(req *http.Request, r render.Render) {
@@ -287,7 +287,7 @@ func api(mart *martini.ClassicMartini) {
             limit = 100
         }
 
-        var tags = make([]models.Tag, 0)
+        var tags = make([]backend.Tag, 0)
         var q = engine.Desc("id")
         if max > -1 {
             q = q.Where("id < ?", max)
@@ -297,7 +297,7 @@ func api(mart *martini.ClassicMartini) {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
         }
 
-        r.JSON(http.StatusOK, map[string][]models.Tag{"tags": tags})
+        r.JSON(http.StatusOK, map[string][]backend.Tag{"tags": tags})
     })
 
     mart.Post(API + "/train/?", func(r render.Render) {
@@ -332,7 +332,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/train.txt", func(r render.Render) {
-        text, err := loadDataset(models.TRAIN)
+        text, err := loadDataset(backend.TRAIN)
         if err != nil {
             r.Data(http.StatusInternalServerError, nil)
             return
@@ -341,7 +341,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/val.txt", func(r render.Render) {
-        text, err := loadDataset(models.VAL)
+        text, err := loadDataset(backend.VAL)
         if err != nil {
             r.Data(http.StatusInternalServerError, nil)
             return

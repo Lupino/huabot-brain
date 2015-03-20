@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/Lupino/huabot-brain/models"
+    "github.com/Lupino/huabot-brain/backend"
     "github.com/mikespook/gearman-go/client"
     "mime/multipart"
     "crypto/sha1"
@@ -22,7 +22,7 @@ import (
 type PredictTag struct {
     Id int         `json:"id,omitempty"`
     Score float64  `json:"score,omitempty"`
-    Tag models.Tag `json:"tag,omitempty"`
+    Tag backend.Tag `json:"tag,omitempty"`
 }
 type PredictResult struct {
     BetResult []PredictTag `json:"bet_result,omitempty"`
@@ -30,7 +30,7 @@ type PredictResult struct {
     Error string           `json:"err,omitempty"`
 }
 
-func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
+func uploadFile(realFile *multipart.FileHeader) (file *backend.File, err error) {
     var source multipart.File
     if source, err = realFile.Open(); err != nil {
         return
@@ -44,8 +44,8 @@ func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     hasher := sha1.New()
     io.Copy(hasher, source)
     fileKey := hex.EncodeToString(hasher.Sum(nil))
-    file = &models.File{Key: fileKey}
-    var engine = models.GetEngine()
+    file = &backend.File{Key: fileKey}
+    var engine = backend.GetEngine()
     has, _ := engine.Get(file)
     if !has {
         var dst *os.File
@@ -68,9 +68,9 @@ func uploadFile(realFile *multipart.FileHeader) (file *models.File, err error) {
     return
 }
 
-func saveTag(realTag string) (tag *models.Tag, err error) {
-    tag = &models.Tag{Name: realTag}
-    var engine = models.GetEngine()
+func saveTag(realTag string) (tag *backend.Tag, err error) {
+    tag = &backend.Tag{Name: realTag}
+    var engine = backend.GetEngine()
     has, _ := engine.Get(tag)
     if !has {
         if _, err = engine.Insert(tag); err != nil {
@@ -81,18 +81,18 @@ func saveTag(realTag string) (tag *models.Tag, err error) {
 }
 
 func deleteTag(tagId int) (err error) {
-    var engine = models.GetEngine()
+    var engine = backend.GetEngine()
     var q = engine.Where("tag_id = ?", tagId)
-    var dataset models.Dataset
-    var tag models.Tag
+    var dataset backend.Dataset
+    var tag backend.Tag
     q.Delete(&dataset)
     engine.Id(tagId).Delete(&tag)
     return
 }
 
-func saveDataset(file *models.File, tag *models.Tag, dataType uint, desc string) (dataset *models.Dataset, err error) {
-    dataset = &models.Dataset{FileId: file.Id, TagId: tag.Id}
-    var engine = models.GetEngine()
+func saveDataset(file *backend.File, tag *backend.Tag, dataType uint, desc string) (dataset *backend.Dataset, err error) {
+    dataset = &backend.Dataset{FileId: file.Id, TagId: tag.Id}
+    var engine = backend.GetEngine()
     has, _ := engine.Get(dataset)
     if !has {
         dataset.DataType = dataType
@@ -101,9 +101,9 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint, desc string)
             return
         }
         var sql string
-        if dataType == models.TRAIN {
+        if dataType == backend.TRAIN {
           sql = "update `tag` set `train_count` = `train_count` + 1 where `id` = ?"
-        } else if dataType == models.VAL {
+        } else if dataType == backend.VAL {
           sql = "update `tag` set `test_count` = `test_count` + 1 where `id` = ?"
         }
         engine.Exec(sql, tag.Id)
@@ -114,9 +114,9 @@ func saveDataset(file *models.File, tag *models.Tag, dataType uint, desc string)
 }
 
 func loadDataset(dataType uint) (text string, err error) {
-    var engine = models.GetEngine()
-    err = engine.Where("data_type=?", dataType).Iterate(new(models.Dataset), func(i int, bean interface{}) error {
-        dataset := bean.(*models.Dataset)
+    var engine = backend.GetEngine()
+    err = engine.Where("data_type=?", dataType).Iterate(new(backend.Dataset), func(i int, bean interface{}) error {
+        dataset := bean.(*backend.Dataset)
         dataset.FillObject()
         text = fmt.Sprintf("%s%s %d\n", text, dataset.File.Key, dataset.TagId)
         return nil
@@ -190,7 +190,7 @@ func caffePredict(url string) (result PredictResult, err error) {
         return
     }
 
-    var engine = models.GetEngine()
+    var engine = backend.GetEngine()
     for i, ptag := range result.BetResult {
         ptag.Tag.Id = ptag.Id
         engine.Get(&ptag.Tag)

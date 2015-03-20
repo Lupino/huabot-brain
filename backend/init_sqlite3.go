@@ -1,6 +1,6 @@
 // +build !mysql
 
-package models
+package backend
 
 import (
     _ "github.com/mattn/go-sqlite3"

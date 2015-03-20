@@ -1,4 +1,4 @@
-package models
+package backend
 
 import (
     "github.com/go-xorm/xorm"
