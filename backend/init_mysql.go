@@ -7,5 +7,5 @@ import (
     "flag"
 )
 
-var sourceName = flag.String("dbpath", "root:@/collect?charset=utf8", "mysql path.")
+var sourceName = flag.String("dbpath", "root:@/huabot?charset=utf8", "mysql path.")
 var driverName = "mysql"

@@ -7,5 +7,5 @@ import (
     "flag"
 )
 
-var sourceName = flag.String("dbpath", "dataset.db", "Sqlite db file.")
+var sourceName = flag.String("dbpath", "resourses/huabot-brain.db", "Sqlite db file.")
 var driverName = "sqlite3"
