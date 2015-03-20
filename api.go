@@ -13,6 +13,7 @@ import (
     "log"
 )
 
+const API = "/api"
 
 type FileForm struct {
     File *multipart.FileHeader `form:"file"`
