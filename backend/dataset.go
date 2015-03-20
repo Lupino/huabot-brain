@@ -20,9 +20,16 @@ const (
     UPLOADPATH = "public/upload/"
 )
 
+var FILE_EXTS = map[string]string{
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+}
+
 type File struct {
     Id        int       `xorm:"pk autoincr"                 json:"file_id,omitempty"`
     Key       string    `xorm:"varchar(128) notnull unique" json:"key,omitempty"`
+    Type      string    `xorm:"varchar(32)"                 json:"type,omitempty"`
     Width     int       `xorm:"integer(4)"                  json:"width,omitempty"`
     Height    int       `xorm:"integer(4)"                  json:"height,omitempty"`
     CreatedAt time.Time `xorm:"created"                     json:"created_at,omitempty"`
@@ -96,7 +103,12 @@ func UploadFile(realFile *multipart.FileHeader) (file *File, err error) {
     has, _ := engine.Get(file)
     if !has {
         var dst *os.File
-        if dst, err = os.Create(UPLOADPATH + fileKey); err != nil {
+        var fileType = realFile.Header.Get("content-type")
+        var ext, ok = FILE_EXTS[fileType]
+        if !ok {
+            ext = ".jpeg"
+        }
+        if dst, err = os.Create(UPLOADPATH + fileKey + ext); err != nil {
             return
         }
         defer dst.Close()
@@ -107,6 +119,7 @@ func UploadFile(realFile *multipart.FileHeader) (file *File, err error) {
 
         file.Width = img.Width
         file.Height = img.Height
+        file.Type = fileType
 
         if _, err = engine.Insert(file); err != nil {
             return

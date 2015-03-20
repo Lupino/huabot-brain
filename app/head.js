@@ -31,3 +31,9 @@ var Router = ReactRouter.Router;
 var Link = ReactRouter.Link;
 var DefaultRoute = ReactRouter.DefaultRoute;
 var NotFoundRoute = ReactRouter.NotFoundRoute;
+
+var FILE_EXTS = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/gif": ".gif",
+};

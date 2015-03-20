@@ -11,12 +11,13 @@ var Dataset = React.createClass({
   },
   render: function() {
     var dataset = this.props.data;
+    var ext = FILE_EXTS[dataset.file.type] || '.jpeg';
     return (
       <Modal {...this.props} title={dataset.tag.name} animation={false}>
         <div className="modal-body">
           <div className="img" data-id={dataset.dataset_id}>
             <div className="dataset">
-              <img src={"/upload/" + dataset.file.key} />
+              <img src={"/upload/" + dataset.file.key + ext} />
             </div>
           </div>
         </div>
@@ -146,12 +147,13 @@ var Datasets = React.createClass({
       if (height > 600) {
         height = 600;
       }
+      var ext = FILE_EXTS[dataset.file.type] || '.jpeg';
       return (
         <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name}
             onRemove={self.handleRemoveDataset} />}>
           <div className="dataset" data-id={dataset.dataset_id}>
             <div className="file" style={{width: width, height: height}}>
-              <img src={"/upload/" + dataset.file.key} />
+              <img src={"/upload/" + dataset.file.key + ext} />
             </div>
             <div className="tag">{dataset.tag.name}</div>
           </div>
@@ -224,10 +226,11 @@ var NewDataset = React.createClass({
     var fileForm, saveBtn, mainBody, dataType;
 
     if (this.state.dataset) {
+      var ext = FILE_EXTS[this.state.dataset.file.type] || '.jpeg';
       var mainBody = (
         <div className="img" data-id={this.state.dataset.dataset_id}>
           <div className="dataset">
-            <img src={"/upload/" + this.state.dataset.file.key} />
+            <img src={"/upload/" + this.state.dataset.file.key + ext} />
           </div>
         </div>
       );
@@ -245,12 +248,13 @@ var NewDataset = React.createClass({
       boxStyle.paddingTop = (136 - height) / 2;
       boxStyle.paddingLeft = (136 - width) / 2;
 
+      var ext = FILE_EXTS[this.state.file.type] || '.jpeg';
       mainBody = (
         <Row className="new-dataset">
           <Col xs={6} md={4}>
             <Panel>
               <div className="imgBox" style={boxStyle}>
-                <img src={"/upload/" + this.state.file.key} width={width} height={height} />
+                <img src={"/upload/" + this.state.file.key + ext} width={width} height={height} />
               </div>
              </Panel>
           </Col>
