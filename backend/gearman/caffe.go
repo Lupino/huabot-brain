@@ -1,15 +1,17 @@
-package main
+package gearman
 
 import (
     "github.com/Lupino/huabot-brain/backend"
     "github.com/mikespook/gearman-go/client"
     "encoding/json"
-    "fmt"
     "sync"
     "log"
+    "flag"
     "bytes"
     "errors"
 )
+
+var GEARMAND = flag.String("gearmand", "127.0.0.1:4730", "The Gearmand server.")
 
 type PredictTag struct {
     Id int         `json:"id,omitempty"`
@@ -20,17 +22,6 @@ type PredictResult struct {
     BetResult []PredictTag `json:"bet_result,omitempty"`
     Time  float64          `json:"time,omitempty"`
     Error string           `json:"err,omitempty"`
-}
-
-func loadDataset(dataType uint) (text string, err error) {
-    var engine = backend.GetEngine()
-    err = engine.Where("data_type=?", dataType).Iterate(new(backend.Dataset), func(i int, bean interface{}) error {
-        dataset := bean.(*backend.Dataset)
-        dataset.FillObject()
-        text = fmt.Sprintf("%s%s %d\n", text, dataset.File.Key, dataset.TagId)
-        return nil
-    })
-    return
 }
 
 func submit(funcName string, workload []byte) ([]byte, error) {
@@ -62,7 +53,7 @@ func submit(funcName string, workload []byte) ([]byte, error) {
     return result, errResult
 }
 
-func caffeTrain() (string, error) {
+func Train() (string, error) {
     result, err := submit("CAFFE:TRAIN", nil)
     if err != nil {
         return "", err
@@ -70,7 +61,7 @@ func caffeTrain() (string, error) {
     return string(result), nil
 }
 
-func caffeTrainStop() (string, error) {
+func Stop() (string, error) {
     result, err := submit("CAFFE:TRAIN:STOP", nil)
     if err != nil {
         return "", err
@@ -78,7 +69,7 @@ func caffeTrainStop() (string, error) {
     return string(result), nil
 }
 
-func caffeTrainStatus() ([]byte, error) {
+func Status() ([]byte, error) {
     result, err := submit("CAFFE:TRAIN:STATUS", nil)
     if err != nil {
         return nil, err
@@ -86,11 +77,11 @@ func caffeTrainStatus() ([]byte, error) {
     return result, nil
 }
 
-func caffeTrainPlot(plotType string) ([]byte, error) {
+func Plot(plotType string) ([]byte, error) {
     return submit("CAFFE:TRAIN:PLOT", []byte(plotType))
 }
 
-func caffePredict(url string) (result PredictResult, err error) {
+func Predict(url string) (result PredictResult, err error) {
     var data []byte
     if data, err = submit("CAFFE:PREDICT:URL", []byte(url)); err != nil {
         return

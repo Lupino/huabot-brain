@@ -5,6 +5,7 @@ import (
     "github.com/martini-contrib/render"
     "github.com/martini-contrib/binding"
     "github.com/Lupino/huabot-brain/backend"
+    "github.com/Lupino/huabot-brain/backend/gearman"
     "mime/multipart"
     "strconv"
     "net/http"
@@ -301,7 +302,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Post(API + "/train/?", func(r render.Render) {
-        result, err := caffeTrain()
+        result, err := gearman.Train()
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
@@ -311,7 +312,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/train/?", func(r render.Render) {
-        result, err := caffeTrainStatus()
+        result, err := gearman.Status()
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
@@ -322,7 +323,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Delete(API + "/train/?", func(r render.Render) {
-        result, err := caffeTrainStop()
+        result, err := gearman.Stop()
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
@@ -332,7 +333,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/train.txt", func(r render.Render) {
-        text, err := loadDataset(backend.TRAIN)
+        text, err := backend.ExportDataset(backend.TRAIN)
         if err != nil {
             r.Data(http.StatusInternalServerError, nil)
             return
@@ -341,7 +342,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/val.txt", func(r render.Render) {
-        text, err := loadDataset(backend.VAL)
+        text, err := backend.ExportDataset(backend.VAL)
         if err != nil {
             r.Data(http.StatusInternalServerError, nil)
             return
@@ -350,7 +351,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/loss.png", func(r render.Render) {
-        result, err := caffeTrainPlot("loss")
+        result, err := gearman.Plot("loss")
         if err != nil {
             r.Redirect("/static/images/loading.png")
             return
@@ -360,7 +361,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/acc.png", func(r render.Render) {
-        result, err := caffeTrainPlot("acc")
+        result, err := gearman.Plot("acc")
         if err != nil {
             r.Redirect("/static/images/loading.png")
             return
@@ -370,7 +371,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Post(API + "/predict/?", binding.Bind(PredictForm{}), func(form PredictForm, r render.Render) {
-        result, err := caffePredict(form.ImgUrl)
+        result, err := gearman.Predict(form.ImgUrl)
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return

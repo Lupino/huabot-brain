@@ -3,6 +3,7 @@ package backend
 import (
     "io"
     "os"
+    "fmt"
     "time"
     "image"
     "crypto/sha1"
@@ -155,3 +156,14 @@ func SaveDataset(file *File, tag *Tag, dataType uint, desc string) (dataset *Dat
     dataset.Tag = tag
     return
 }
+
+func ExportDataset(dataType uint) (text string, err error) {
+    err = engine.Where("data_type=?", dataType).Iterate(new(Dataset), func(i int, bean interface{}) error {
+        dataset := bean.(*Dataset)
+        dataset.FillObject()
+        text = fmt.Sprintf("%s%s %d\n", text, dataset.File.Key, dataset.TagId)
+        return nil
+    })
+    return
+}
+
