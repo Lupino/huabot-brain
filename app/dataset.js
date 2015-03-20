@@ -53,6 +53,8 @@ var Datasets = React.createClass({
     this.limit = limit;
     var dataType = params.dataType || 'all';
     jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType + '&tag=' + tag, function(data) {
+      data.has_more = data.datasets.length >= self.limit;
+      data.lastDataset = data.datasets[data.datasets.length - 1];
       self.setState(data);
     });
   },
@@ -69,7 +71,7 @@ var Datasets = React.createClass({
 
   getInitialState: function() {
     this.cache = this.cache || {};
-    return {datasets: []};
+    return {datasets: [], lastDataset: null, has_more: false};
   },
 
   shouldLoadDatasets: function() {
@@ -121,10 +123,10 @@ var Datasets = React.createClass({
     var self = this;
     var datasets = this.state.datasets || [];
     var loadMore;
-    if (datasets.length >= this.limit) {
+    if (this.state.has_more && this.state.lastDataset) {
       var query = this.getQuery();
       query = query || {};
-      query.max = datasets[datasets.length - 1].dataset_id;
+      query.max = this.state.lastDataset.dataset_id;
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
@@ -134,7 +136,7 @@ var Datasets = React.createClass({
     }
     if (this.cache.datasets && this.cache.datasets.length > 0) {
       var oldLastDataset = this.cache.datasets[this.cache.datasets.length - 1];
-      var lastDataset = datasets[datasets.length - 1];
+      var lastDataset = this.state.lastDataset;
       if ( lastDataset && oldLastDataset.dataset_id !== lastDataset.dataset_id) {
         this.cache.datasets = this.cache.datasets.concat(datasets);
       }

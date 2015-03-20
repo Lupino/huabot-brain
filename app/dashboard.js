@@ -8,6 +8,8 @@ var Dashboard = React.createClass({
     var limit = Number(query.limit) || 20;
     this.limit = limit;
     jQuery.get('/api/tags/?max=' + max + '&limit=' + limit, function(data) {
+      data.has_more = data.tags.length >= self.limit;
+      data.lastTag = data.tags[data.tags.length - 1];
       self.setState(data);
     });
 
@@ -86,7 +88,8 @@ var Dashboard = React.createClass({
   getInitialState: function() {
     this.cache = this.cache || {};
     return {tags: [], status: 'no train', acc: 0, loss: 0,
-            removeTag: false, updateTag: false, trainWorker: false};
+            removeTag: false, updateTag: false, trainWorker: false,
+            has_more: false, lastTag: null};
   },
 
   shouldLoadTags: function() {
@@ -173,10 +176,10 @@ var Dashboard = React.createClass({
   render: function() {
     var tags = this.state.tags || [];
     var loadMore;
-    if (tags.length >= this.limit) {
+    if (this.state.has_more && this.state.lastTag) {
       var query = this.getQuery();
       query = query || {};
-      query.max = tags[tags.length - 1].tag_id;
+      query.max = this.state.lastTag.tag_id;
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
@@ -186,7 +189,7 @@ var Dashboard = React.createClass({
     }
     if (this.cache.tags && this.cache.tags.length > 0) {
       var oldLastTag = this.cache.tags[this.cache.tags.length - 1];
-      var lastTag = tags[tags.length - 1];
+      var lastTag = this.state.lastTag;
       if (lastTag && oldLastTag.tag_id !== lastTag.tag_id) {
         this.cache.tags = this.cache.tags.concat(tags);
       }
