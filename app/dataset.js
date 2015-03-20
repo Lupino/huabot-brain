@@ -11,7 +11,7 @@ var Dataset = React.createClass({
   },
   render: function() {
     var dataset = this.props.data;
-    var ext = FILE_EXTS[dataset.file.type] || '.jpeg';
+    var ext = FILE_EXTS[dataset.file.type] || '.jpg';
     return (
       <Modal {...this.props} title={dataset.tag.name} animation={false}>
         <div className="modal-body">
@@ -147,7 +147,7 @@ var Datasets = React.createClass({
       if (height > 600) {
         height = 600;
       }
-      var ext = FILE_EXTS[dataset.file.type] || '.jpeg';
+      var ext = FILE_EXTS[dataset.file.type] || '.jpg';
       return (
         <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name}
             onRemove={self.handleRemoveDataset} />}>
@@ -226,7 +226,7 @@ var NewDataset = React.createClass({
     var fileForm, saveBtn, mainBody, dataType;
 
     if (this.state.dataset) {
-      var ext = FILE_EXTS[this.state.dataset.file.type] || '.jpeg';
+      var ext = FILE_EXTS[this.state.dataset.file.type] || '.jpg';
       var mainBody = (
         <div className="img" data-id={this.state.dataset.dataset_id}>
           <div className="dataset">
@@ -248,7 +248,7 @@ var NewDataset = React.createClass({
       boxStyle.paddingTop = (136 - height) / 2;
       boxStyle.paddingLeft = (136 - width) / 2;
 
-      var ext = FILE_EXTS[this.state.file.type] || '.jpeg';
+      var ext = FILE_EXTS[this.state.file.type] || '.jpg';
       mainBody = (
         <Row className="new-dataset">
           <Col xs={6} md={4}>

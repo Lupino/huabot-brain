@@ -106,7 +106,7 @@ func UploadFile(realFile *multipart.FileHeader) (file *File, err error) {
         var fileType = realFile.Header.Get("content-type")
         var ext, ok = FILE_EXTS[fileType]
         if !ok {
-            ext = ".jpeg"
+            ext = ".jpg"
         }
         if dst, err = os.Create(UPLOADPATH + fileKey + ext); err != nil {
             return
