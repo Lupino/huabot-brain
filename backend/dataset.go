@@ -174,7 +174,11 @@ func ExportDataset(dataType uint) (text string, err error) {
     err = engine.Where("data_type=?", dataType).Iterate(new(Dataset), func(i int, bean interface{}) error {
         dataset := bean.(*Dataset)
         dataset.FillObject()
-        text = fmt.Sprintf("%s%s %d\n", text, dataset.File.Key, dataset.TagId)
+        var ext, ok = FILE_EXTS[dataset.File.Type]
+        if !ok {
+            ext = ".jpg"
+        }
+        text = fmt.Sprintf("%s%s%s %d\n", text, dataset.File.Key, ext, dataset.TagId)
         return nil
     })
     return
