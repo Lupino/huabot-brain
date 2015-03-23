@@ -4,28 +4,27 @@ var DEMO = React.createClass({
   },
 
 
-  predict: function(img_url) {
+  predict (img_url) {
     var self = this;
-    jQuery.post('/api/predict', {img_url: img_url}, function(data) {
-      self.setState(data);
-    }).fail(function() {
-      alert("Error: please make sure the predict worker is started.");
-    });
+    jQuery.post('/api/predict', {img_url: img_url},
+                data => self.setState(data)).fail(() =>
+      alert("Error: please make sure the predict worker is started.")
+    );
 
   },
 
-  getInitialState: function() {
+  getInitialState () {
     this.cache = {};
     var query = this.context.router.getCurrentQuery();
     var img_url = query.img_url || '';
     return {bet_result: [], time: null, err: null};
   },
 
-  componentDidMount: function() {
+  componentDidMount () {
     this.componentDidUpdate();
   },
 
-  componentDidUpdate: function() {
+  componentDidUpdate () {
     var query = this.context.router.getCurrentQuery();
     if (query.img_url && query.img_url !== this.cache.imgUrl) {
       this.cache.imgUrl = query.img_url;
@@ -33,7 +32,7 @@ var DEMO = React.createClass({
     }
   },
 
-  handleSubmit: function(evt) {
+  handleSubmit (evt) {
     evt.preventDefault();
     var imgUrl = this.refs.imgUrl.getValue();
     if (imgUrl === this.cache.imgUrl) {
@@ -45,12 +44,12 @@ var DEMO = React.createClass({
     window.location.href = href;
   },
 
-  renderResult: function() {
+  renderResult () {
     if (!this.state.bet_result || this.state.bet_result.length === 0) {
       return;
     }
 
-    var elems = this.state.bet_result.map(function(result) {
+    var elems = this.state.bet_result.map(result => {
       var tag = result.tag;
       return (
         <tr>
@@ -96,7 +95,7 @@ var DEMO = React.createClass({
     );
   },
 
-  render: function() {
+  render () {
     return (
       <div className="dashboard demo">
         <Panel>

@@ -5,13 +5,13 @@ var App = React.createClass({
 
   mixins: [OverlayMixin],
 
-  getInitialState: function() {
+  getInitialState () {
     var {router} = this.context;
     var tag = router.getCurrentQuery().tag || '';
     return {tag: tag, isModalOpen: false};
   },
 
-  handleSubmit: function(tag) {
+  handleSubmit(tag) {
     var {router} = this.context;
     var query = router.getCurrentQuery();
     var params = router.getCurrentParams();
@@ -23,7 +23,7 @@ var App = React.createClass({
     this.setState({tag: tag || ''});
   },
 
-  handleToggle: function (evt) {
+  handleToggle (evt) {
     this.setState({
       isModalOpen: !this.state.isModalOpen
     });
@@ -31,14 +31,14 @@ var App = React.createClass({
 
  // This is called by the `OverlayMixin` when this component
   // is mounted or updated and the return value is appended to the body.
-  renderOverlay: function () {
+  renderOverlay () {
     if (!this.state.isModalOpen) {
       return <span />;
     }
 
     return <NewDataset onRequestHide={this.handleToggle} />;
   },
-  render: function() {
+  render () {
     return (
       <div className="app-main">
         <Navbar fixedTop inverse fluid brand="Huabot Brain">

@@ -8,6 +8,6 @@ var routes = (
   </Route>
 );
 
-ReactRouter.run(routes, function (Handler, state) {
+ReactRouter.run(routes, (Handler, state) => {
   React.render(<Handler />, document.body);
 });

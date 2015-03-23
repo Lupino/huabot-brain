@@ -1,15 +1,15 @@
 var Dataset = React.createClass({
-  handleDelete: function() {
+  handleDelete () {
     var self = this;
     jQuery.ajax({
       method: 'DELETE',
       url: '/api/datasets/' + this.props.data.dataset_id
-    }).done(function() {
+    }).done(() => {
       self.props.onRemove(self.props.data.dataset_id);
       self.props.onRequestHide();
     });
   },
-  render: function() {
+  render () {
     var dataset = this.props.data;
     var ext = FILE_EXTS[dataset.file.type] || '.jpg';
     return (
@@ -36,7 +36,7 @@ var Datasets = React.createClass({
     router: React.PropTypes.func.isRequired
   },
 
-  waterfall: function() {
+  waterfall () {
     if (this.cache.datasets.length === 0) {
       return;
     }
@@ -45,7 +45,7 @@ var Datasets = React.createClass({
     });
   },
 
-  loadDatasets: function() {
+  loadDatasets () {
     var self = this;
     var {router} = this.context;
     var query = router.getCurrentQuery();
@@ -62,22 +62,17 @@ var Datasets = React.createClass({
     });
   },
 
-  handleRemoveDataset: function(datasetId) {
-    this.cache.datasets = this.cache.datasets.filter(function(dataset) {
-      if (dataset.dataset_id === datasetId) {
-        return false;
-      }
-      return true;
-    });
+  handleRemoveDataset (datasetId) {
+    this.cache.datasets = this.cache.datasets.filter(d => d.dataset_id !== datasetId);
     this.setState({removeDataset: datasetId, datasets: []});
   },
 
-  getInitialState: function() {
+  getInitialState () {
     this.cache = this.cache || {};
     return {datasets: [], lastDataset: null, has_more: false};
   },
 
-  shouldLoadDatasets: function() {
+  shouldLoadDatasets () {
     var path = this.context.router.getCurrentPath();
     if (this.cache.path !== path) {
       this.cache.path = path;
@@ -86,7 +81,7 @@ var Datasets = React.createClass({
     return false;
   },
 
-  shouldCleanDatasets: function() {
+  shouldCleanDatasets () {
     var {router} = this.context;
     var query = router.getCurrentQuery();
     var pathname = router.getCurrentPathname();
@@ -99,16 +94,16 @@ var Datasets = React.createClass({
     return false;
   },
 
-  cleanDatasets: function() {
+  cleanDatasets () {
     this.cache.datasets = [];
   },
 
-  componentDidMount: function() {
+  componentDidMount () {
     this.cache.datasets = this.cache.datasets || [];
     this.componentDidUpdate();
   },
 
-  componentDidUpdate: function() {
+  componentDidUpdate () {
     if (this.shouldLoadDatasets()) {
       if (this.shouldCleanDatasets()) {
         this.cleanDatasets();
@@ -123,7 +118,7 @@ var Datasets = React.createClass({
     }
   },
 
-  render: function() {
+  render () {
     var self = this;
     var {router} = this.context;
     var datasets = this.state.datasets || [];
@@ -148,7 +143,7 @@ var Datasets = React.createClass({
     } else {
       this.cache.datasets = datasets;
     }
-    var elems = this.cache.datasets.map(function(dataset) {
+    var elems = this.cache.datasets.map(dataset => {
       var width = 192;
       var height = width / dataset.file.width * dataset.file.height;
       if (height > 600) {
@@ -180,41 +175,39 @@ var Datasets = React.createClass({
 
 var NewDataset = React.createClass({
 
-  handleClick: function() {
+  handleClick () {
     $(this.refs.file.getDOMNode()).click();
   },
 
-  getInitialState: function() {
+  getInitialState () {
     return {
       file: null,
       dataset: null
     };
   },
 
-  componentDidMount: function () {
+  componentDidMount  () {
     var self = this;
-    $(".fileForm").ajaxForm(function(result) {
-      self.setState(result);
-    });
+    $(".fileForm").ajaxForm(result => self.setState(result));
   },
 
-  handleFile: function() {
+  handleFile () {
     $(this.refs.fileForm.getDOMNode()).submit();
   },
 
-  handleToggle: function() {
+  handleToggle () {
     this.props.onRequestHide();
     if (this.state.dataset) {
       window.location.reload();
     }
   },
 
-  handleDataTypeClick: function(evt) {
+  handleDataTypeClick (evt) {
     var dataType = evt.target.value;
     this.setState({data_type: dataType});
   },
 
-  handleSave: function() {
+  handleSave () {
     var self = this;
     var file_id = this.state.file.file_id;
     var tag = this.refs.tag.getValue();
@@ -223,12 +216,12 @@ var NewDataset = React.createClass({
     if (!tag) {
       alert("Tag is required.");
     }
-    jQuery.post("/api/datasets", {tag: tag, file_id: file_id, description: desc, data_type: dataType}, function(data) {
-      self.setState(data);
-    });
+    jQuery.post("/api/datasets",
+        {tag: tag, file_id: file_id, description: desc, data_type: dataType},
+        data => self.setState(data));
   },
 
-  render: function() {
+  render () {
     var action = this.props.action || '/api/upload';
     var fileForm, saveBtn, mainBody, dataType;
 

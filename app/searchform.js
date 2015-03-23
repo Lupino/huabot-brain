@@ -3,7 +3,7 @@ var SearchForm = React.createClass({
     router: React.PropTypes.func.isRequired
   },
 
-  getInitialState: function() {
+  getInitialState () {
     var {router} = this.context;
     var query = router.getCurrentQuery();
     this.cache = this.cache || {};
@@ -16,14 +16,12 @@ var SearchForm = React.createClass({
     };
   },
 
-  getHint: function(word) {
+  getHint (word) {
     var self = this;
-    jQuery.get('/api/tags/hint?word=' + word, function(data) {
-      self.setState(data);
-    });
+    jQuery.get('/api/tags/hint?word=' + word, data => self.setState(data));
   },
 
-  shouldCleanHint: function() {
+  shouldCleanHint () {
     var path = this.context.router.getCurrentPath();
     if (this.cache.path === path) {
       return false;
@@ -33,11 +31,11 @@ var SearchForm = React.createClass({
 
   },
 
-  cleanHint: function() {
+  cleanHint () {
     this.setState({tags: []});
   },
 
-  componentDidUpdate: function() {
+  componentDidUpdate () {
     if (this.cache.changed) {
       if (this.shouldCleanHint()) {
         this.cache.changed = false;
@@ -56,7 +54,7 @@ var SearchForm = React.createClass({
     this.cache.path = this.context.router.getCurrentPath();
   },
 
-  handleChange: function() {
+  handleChange () {
     this.cache.changed = true;
     this.getHint(this.refs.tag.getValue());
     this.setState({
@@ -64,23 +62,21 @@ var SearchForm = React.createClass({
     });
   },
 
-  handleSubmit: function(evt) {
+  handleSubmit (evt) {
     evt.preventDefault();
     this.cache.changed = false;
     this.props.onSubmit(this.state.value);
   },
 
-  handleListClick: function(evt) {
+  handleListClick (evt) {
     var target = evt.target.innerText.trim();
     this.cache.changed = false;
     this.props.onSubmit(target);
     this.setState({tags: [], value: target});
   },
 
-  render: function() {
-    var list = this.state.tags.map(function(tag) {
-      return <ListGroupItem> {tag.name} </ListGroupItem>;
-    });
+  render () {
+    var list = this.state.tags.map(tag => <ListGroupItem> {tag.name} </ListGroupItem>);
     return (
       <form className="navbar-form navbar-right" onSubmit={this.handleSubmit}>
         <Input type="text"
