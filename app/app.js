@@ -1,18 +1,24 @@
 var App = React.createClass({
-  mixins: [State, Navigation, OverlayMixin],
+  contextTypes: {
+    router: React.PropTypes.func.isRequired
+  },
+
+  mixins: [OverlayMixin],
 
   getInitialState: function() {
-    var tag = this.getQuery().tag || '';
+    var {router} = this.context;
+    var tag = router.getCurrentQuery().tag || '';
     return {tag: tag, isModalOpen: false};
   },
 
   handleSubmit: function(tag) {
-    var query = this.getQuery();
-    var params = this.getParams();
+    var {router} = this.context;
+    var query = router.getCurrentQuery();
+    var params = router.getCurrentParams();
     params.dataType = params.dataType || 'all';
     query.tag = tag;
     delete query.max;
-    var href = this.makeHref('datasets', params, query);
+    var href = router.makeHref('datasets', params, query);
     window.location.href = href;
     this.setState({tag: tag || ''});
   },

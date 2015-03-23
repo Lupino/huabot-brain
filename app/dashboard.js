@@ -1,9 +1,11 @@
 var Dashboard = React.createClass({
-  mixins: [State],
+  contextTypes: {
+    router: React.PropTypes.func.isRequired
+  },
 
   loadTags: function() {
     var self = this;
-    var query = this.getQuery();
+    var query = this.context.router.getCurrentQuery();
     var max = query.max || '';
     var limit = Number(query.limit) || 20;
     this.limit = limit;
@@ -93,7 +95,7 @@ var Dashboard = React.createClass({
   },
 
   shouldLoadTags: function() {
-    var path = this.getPath();
+    var path = this.context.router.getCurrentPath();
     if (this.cache.path !== path) {
       this.cache.path = path;
       return true;
@@ -102,7 +104,7 @@ var Dashboard = React.createClass({
   },
 
   shouldCleanTags: function() {
-    if (!this.getQuery().max) {
+    if (!this.context.router.getCurrentQuery().max) {
       return true;
     }
     return false;
@@ -176,14 +178,15 @@ var Dashboard = React.createClass({
   render: function() {
     var tags = this.state.tags || [];
     var loadMore;
+    var {router} = this.context;
     if (this.state.has_more && this.state.lastTag) {
-      var query = this.getQuery();
+      var query = router.getCurrentQuery();
       query = query || {};
       query.max = this.state.lastTag.tag_id;
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
-              params={this.getParams()} to="dashboard" query={query} block>Load More...</ButtonLink>
+              params={router.getCurrentParams()} to="dashboard" query={query} block>Load More...</ButtonLink>
         </div>
       );
     }

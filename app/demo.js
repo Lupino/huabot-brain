@@ -1,5 +1,8 @@
 var DEMO = React.createClass({
-  mixins: [State, Navigation],
+  contextTypes: {
+    router: React.PropTypes.func.isRequired
+  },
+
 
   predict: function(img_url) {
     var self = this;
@@ -13,7 +16,7 @@ var DEMO = React.createClass({
 
   getInitialState: function() {
     this.cache = {};
-    var query = this.getQuery();
+    var query = this.context.router.getCurrentQuery();
     var img_url = query.img_url || '';
     return {bet_result: [], time: null, err: null};
   },
@@ -23,7 +26,7 @@ var DEMO = React.createClass({
   },
 
   componentDidUpdate: function() {
-    var query = this.getQuery();
+    var query = this.context.router.getCurrentQuery();
     if (query.img_url && query.img_url !== this.cache.imgUrl) {
       this.cache.imgUrl = query.img_url;
       this.predict(this.cache.imgUrl);
@@ -38,7 +41,7 @@ var DEMO = React.createClass({
     }
     this.cache.imgUrl = imgUrl;
     this.predict(imgUrl);
-    var href = this.makeHref('demo', {}, {img_url: imgUrl});
+    var href = this.context.router.makeHref('demo', {}, {img_url: imgUrl});
     window.location.href = href;
   },
 

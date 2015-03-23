@@ -23,8 +23,6 @@ var NavItemLink = require('react-router-bootstrap/lib/NavItemLink');
 var ButtonLink = require('react-router-bootstrap/lib/ButtonLink');
 
 var ReactRouter = require('react-router');
-var State = ReactRouter.State;
-var Navigation = ReactRouter.Navigation;
 var RouteHandler = ReactRouter.RouteHandler;
 var Route = ReactRouter.Route;
 var Router = ReactRouter.Router;

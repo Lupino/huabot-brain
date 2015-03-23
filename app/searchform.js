@@ -1,11 +1,14 @@
 var SearchForm = React.createClass({
-  mixins: [State],
+  contextTypes: {
+    router: React.PropTypes.func.isRequired
+  },
 
   getInitialState: function() {
-    var query = this.getQuery();
+    var {router} = this.context;
+    var query = router.getCurrentQuery();
     this.cache = this.cache || {};
     this.cache.changed = true;
-    this.cache.path = this.getPath();
+    this.cache.path = router.getCurrentPath();
 
     return {
       value: query.tag || '',
@@ -21,7 +24,7 @@ var SearchForm = React.createClass({
   },
 
   shouldCleanHint: function() {
-    var path = this.getPath();
+    var path = this.context.router.getCurrentPath();
     if (this.cache.path === path) {
       return false;
     }
@@ -42,7 +45,7 @@ var SearchForm = React.createClass({
       }
       return;
     }
-    var query = this.getQuery();
+    var query = this.context.router.getCurrentQuery();
     if (query.tag && query.tag !== this.state.value) {
       this.setState({
         value: query.tag
@@ -50,7 +53,7 @@ var SearchForm = React.createClass({
     } else if (!query.tag && this.state.value) {
       this.setState({value: ''});
     }
-    this.cache.path = this.getPath();
+    this.cache.path = this.context.router.getCurrentPath();
   },
 
   handleChange: function() {

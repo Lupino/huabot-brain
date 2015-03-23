@@ -32,7 +32,9 @@ var Dataset = React.createClass({
 
 
 var Datasets = React.createClass({
-  mixins: [State],
+  contextTypes: {
+    router: React.PropTypes.func.isRequired
+  },
 
   waterfall: function() {
     if (this.cache.datasets.length === 0) {
@@ -45,8 +47,9 @@ var Datasets = React.createClass({
 
   loadDatasets: function() {
     var self = this;
-    var query = this.getQuery();
-    var params = this.getParams();
+    var {router} = this.context;
+    var query = router.getCurrentQuery();
+    var params = router.getCurrentParams();
     var max = query.max || '';
     var limit = Number(query.limit) || 50;
     var tag = query.tag || '';
@@ -75,7 +78,7 @@ var Datasets = React.createClass({
   },
 
   shouldLoadDatasets: function() {
-    var path = this.getPath();
+    var path = this.context.router.getCurrentPath();
     if (this.cache.path !== path) {
       this.cache.path = path;
       return true;
@@ -84,8 +87,9 @@ var Datasets = React.createClass({
   },
 
   shouldCleanDatasets: function() {
-    var pathname = this.getPathname();
-    var query = this.getQuery();
+    var {router} = this.context;
+    var query = router.getCurrentQuery();
+    var pathname = router.getCurrentPathname();
     if (this.cache.pathname !== pathname || this.cache.tag !== query.tag || !query.max) {
       this.cache.pathname = pathname;
       this.cache.tag = query.tag;
@@ -121,16 +125,17 @@ var Datasets = React.createClass({
 
   render: function() {
     var self = this;
+    var {router} = this.context;
     var datasets = this.state.datasets || [];
     var loadMore;
     if (this.state.has_more && this.state.lastDataset) {
-      var query = this.getQuery();
+      var query = router.getCurrentQuery();
       query = query || {};
       query.max = this.state.lastDataset.dataset_id;
       loadMore = (
         <div className="load-more">
           <ButtonLink bsStyle="info" bsSize="large"
-              params={this.getParams()} to="datasets" query={query} block>Load More...</ButtonLink>
+              params={router.getCurrentParams()} to="datasets" query={query} block>Load More...</ButtonLink>
         </div>
       );
     }
