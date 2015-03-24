@@ -1,14 +1,14 @@
 LESS_SOURCE =
-JSX_SOURCE = app/dashboard.js \
-			 app/dataset.js \
-			 app/demo.js \
-			 app/searchform.js \
-			 app/app.js
+JSX_SOURCE = app/dashboard.jsx \
+			 app/dataset.jsx \
+			 app/demo.jsx \
+			 app/searchform.jsx \
+			 app/app.jsx
 
-HEAD = app/head.js
-TAIL = app/tail.js
+HEAD = app/head.jsx
+TAIL = app/tail.jsx
 
-BUNDLE = app/bundle.js
+BUNDLE = app/bundle.jsx
 
 APP = public/static/js/main.js
 

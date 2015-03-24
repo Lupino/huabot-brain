@@ -13,4 +13,4 @@ resourses/logs/*
 !resourses/logs/README.md
 !tools/datasets/*.txt
 node_modules
-bundle.js
+bundle.jsx
