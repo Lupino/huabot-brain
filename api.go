@@ -201,6 +201,7 @@ func api(mart *martini.ClassicMartini) {
 
         if file, err = backend.UploadFile(form.File); err != nil {
             r.JSON(http.StatusInternalServerError, map[string]interface{}{"err": err.Error()})
+            return
         }
 
         r.JSON(http.StatusOK, map[string]*backend.File{"file": file})
