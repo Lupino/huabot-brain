@@ -20,6 +20,8 @@ $(APP): $(BUNDLE)
 $(BUNDLE): $(HEAD) $(JSX_SOURCE) $(TAIL)
 	cat $(HEAD) $(JSX_SOURCE) $(TAIL) > $@
 
+deps: package.json
+	npm install
 
 clean:
 	rm -f $(APP)
