@@ -188,7 +188,10 @@ var NewDataset = React.createClass({
 
   componentDidMount  () {
     var self = this;
-    $(".fileForm").ajaxForm(result => self.setState(result));
+    $(".fileForm").ajaxForm({
+      success(result) {self.setState(result);},
+      error() { alert("Please choose an image...");}
+    });
   },
 
   handleFile () {
