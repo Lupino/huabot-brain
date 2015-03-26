@@ -8,9 +8,8 @@ var Dashboard = React.createClass({
     var query = this.context.router.getCurrentQuery();
     var max = query.max || '';
     var limit = Number(query.limit) || 20;
-    this.limit = limit;
     jQuery.get('/api/tags/?max=' + max + '&limit=' + limit, data => {
-      data.has_more = data.tags.length >= self.limit;
+      data.has_more = data.tags.length >= limit;
       data.lastTag = data.tags[data.tags.length - 1];
       self.setState(data);
     });

@@ -53,10 +53,9 @@ var Datasets = React.createClass({
     var max = query.max || '';
     var limit = Number(query.limit) || 50;
     var tag = query.tag || '';
-    this.limit = limit;
     var dataType = params.dataType || 'all';
     jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType + '&tag=' + tag, function(data) {
-      data.has_more = data.datasets.length >= self.limit;
+      data.has_more = data.datasets.length >= limit;
       data.lastDataset = data.datasets[data.datasets.length - 1];
       self.setState(data);
     });
