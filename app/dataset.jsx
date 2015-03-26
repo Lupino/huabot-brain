@@ -54,6 +54,10 @@ var Datasets = React.createClass({
     var limit = Number(query.limit) || 50;
     var tag = query.tag || '';
     var dataType = params.dataType || 'all';
+    if (this.cache.dataType && this.cache.dataType !== dataType) {
+      max = '';
+    }
+    this.cache.dataType = dataType;
     jQuery.get('/api/datasets/?max=' + max + '&limit=' + limit + '&data_type=' + dataType + '&tag=' + tag, function(data) {
       data.has_more = data.datasets.length >= limit;
       data.lastDataset = data.datasets[data.datasets.length - 1];
