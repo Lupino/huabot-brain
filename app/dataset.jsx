@@ -152,7 +152,7 @@ var Datasets = React.createClass({
       var ext = FILE_EXTS[dataset.file.type] || '.jpg';
       return (
         <ModalTrigger modal={<Dataset data={dataset} title={dataset.tag.name}
-            onRemove={self.handleRemoveDataset} />}>
+            onRemove={self.handleRemoveDataset} />} key={dataset.dataset_id}>
           <div className="dataset" data-id={dataset.dataset_id}>
             <div className="file" style={{width: width, height: height}}>
               <img src={"/upload/" + dataset.file.key + ext} />

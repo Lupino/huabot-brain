@@ -52,7 +52,7 @@ var DEMO = React.createClass({
     var elems = this.state.bet_result.map(result => {
       var tag = result.tag;
       return (
-        <tr>
+        <tr key={tag.tag_id}>
           <td>{tag.tag_id}</td>
           <td><Link to="datasets" params={{dataType: 'all'}} query={{tag: tag.name}}>{tag.name}</Link></td>
           <td>{result.score}</td>

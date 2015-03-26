@@ -194,7 +194,7 @@ var Dashboard = React.createClass({
     }
     var elems = this.cache.tags.map(tag => {
       return (
-        <tr>
+        <tr key={tag.tag_id}>
           <td>{tag.tag_id}</td>
           <td><Link to="datasets" params={{dataType: 'all'}} query={{tag: tag.name}}>{tag.name}</Link></td>
           <td>{tag.train_count}</td>
