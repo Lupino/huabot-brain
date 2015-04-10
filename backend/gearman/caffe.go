@@ -4,9 +4,9 @@ import (
     "github.com/Lupino/huabot-brain/backend"
     "github.com/mikespook/gearman-go/client"
     "encoding/json"
-    "sync"
     "log"
     "flag"
+    "time"
     "bytes"
     "errors"
 )
@@ -25,7 +25,7 @@ type PredictResult struct {
 }
 
 func submit(funcName string, workload []byte) ([]byte, error) {
-    var mutex sync.Mutex
+    var wait = make(chan bool)
     var result []byte
     var errResult error
     c, err := client.New("tcp4", *GEARMAND)
@@ -38,17 +38,23 @@ func submit(funcName string, workload []byte) ([]byte, error) {
     }
     jobHandler := func(resp *client.Response) {
         result, errResult = resp.Result()
-        mutex.Unlock()
+        wait <- true
     }
     _, err = c.Do(funcName, workload, client.JobNormal, jobHandler)
     if err != nil {
-        log.Printf("Gearman Doing %s Error: %s\n", funcName, err)
+        log.Printf("Error: process %s fail: %s\n", funcName, err)
         return nil, err
     }
-    mutex.Lock()
-    mutex.Lock()
+
+    select {
+    case <- time.After(time.Second * 60):
+        errResult = errors.New("TimeoutError: process " + funcName + " timeout.")
+    case <- wait:
+    }
+    close(wait)
+
     if bytes.Equal(result, []byte("error")) {
-        errResult = errors.New("Gearman doing " + funcName + " Error")
+        errResult = errors.New("Error: process " + funcName + " fail.")
     }
     return result, errResult
 }
