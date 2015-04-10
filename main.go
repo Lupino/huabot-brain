@@ -3,6 +3,7 @@ package main
 import (
     "github.com/go-martini/martini"
     "github.com/martini-contrib/render"
+    "github.com/Lupino/huabot-brain/backend"
     "flag"
     "io/ioutil"
     "net/http"
@@ -20,6 +21,8 @@ func main() {
         IndentXML: true,
         HTMLContentType: "application/xhtml+xml",
     }))
+
+    backend.Init()
 
     api(mart)
 

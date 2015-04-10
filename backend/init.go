@@ -8,7 +8,7 @@ import (
 
 var engine *xorm.Engine
 
-func init() {
+func Init() {
     var err error
     if engine, err = xorm.NewEngine(driverName, *sourceName); err != nil {
         log.Fatal(err)
