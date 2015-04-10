@@ -11,20 +11,14 @@ import (
     _ "image/jpeg"
     "encoding/hex"
     "mime/multipart"
+    "github.com/Lupino/huabot-brain/config"
 )
 
 const (
     CANDIDATE uint = 0
     TRAIN     uint = 1
     VAL       uint = 2
-    UPLOADPATH = "public/upload/"
 )
-
-var FILE_EXTS = map[string]string{
-    "image/png": ".png",
-    "image/jpeg": ".jpg",
-    "image/gif": ".gif",
-}
 
 type File struct {
     Id        int       `xorm:"pk autoincr"                 json:"file_id,omitempty"`
@@ -104,11 +98,11 @@ func UploadFile(realFile *multipart.FileHeader) (file *File, err error) {
     if !has {
         var dst *os.File
         var fileType = realFile.Header.Get("content-type")
-        var ext, ok = FILE_EXTS[fileType]
+        var ext, ok = config.FILE_EXTS[fileType]
         if !ok {
             ext = ".jpg"
         }
-        if dst, err = os.Create(UPLOADPATH + fileKey + ext); err != nil {
+        if dst, err = os.Create(config.UPLOADPATH + fileKey + ext); err != nil {
             return
         }
         defer dst.Close()
@@ -174,7 +168,7 @@ func ExportDataset(dataType uint) (text string, err error) {
     err = engine.Where("data_type=?", dataType).Iterate(new(Dataset), func(i int, bean interface{}) error {
         dataset := bean.(*Dataset)
         dataset.FillObject()
-        var ext, ok = FILE_EXTS[dataset.File.Type]
+        var ext, ok = config.FILE_EXTS[dataset.File.Type]
         if !ok {
             ext = ".jpg"
         }

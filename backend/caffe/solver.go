@@ -6,18 +6,7 @@ import (
     "log"
     "sync"
     "github.com/Lupino/huabot-brain/backend"
-)
-
-var (
-    resoursesPath = "resourses"
-    UPLOADPATH = "public/upload/"
-    TRAIN_FILE = resoursesPath + "/train.txt"
-    VAL_FILE = resoursesPath + "/val.txt"
-    TRAIN_LMDB = resoursesPath + "/train_lmdb"
-    VAL_LMDB = resoursesPath + "/val_lmdb"
-    MEAN_FILE = resoursesPath + "/mean.binaryproto"
-    SOLVER_FILE = resoursesPath + "/solver.prototxt"
-    LOG_DIR = resoursesPath + "/logs"
+    "github.com/Lupino/huabot-brain/config"
 )
 
 var solverLocker = new(sync.Mutex)
@@ -29,7 +18,7 @@ func exportToFile(file *os.File, dataType uint) (err error) {
                                                         func(i int, bean interface{}) error {
         dataset := bean.(*backend.Dataset)
         dataset.FillObject()
-        var ext, ok = backend.FILE_EXTS[dataset.File.Type]
+        var ext, ok = config.FILE_EXTS[dataset.File.Type]
         if !ok {
             ext = ".jpg"
         }
@@ -41,7 +30,7 @@ func exportToFile(file *os.File, dataType uint) (err error) {
 
 func prepare() (err error) {
     var trainFile, valFile *os.File
-    if trainFile, err = os.Create(TRAIN_FILE); err != nil {
+    if trainFile, err = os.Create(config.TRAIN_FILE); err != nil {
         return
     }
     defer trainFile.Close()
@@ -58,7 +47,7 @@ func prepare() (err error) {
         return
     }
 
-    if valFile, err = os.Create(VAL_FILE); err != nil {
+    if valFile, err = os.Create(config.VAL_FILE); err != nil {
         return
     }
     defer valFile.Close()
@@ -75,8 +64,8 @@ func prepare() (err error) {
         return
     }
 
-    os.RemoveAll(TRAIN_LMDB)
-    os.RemoveAll(VAL_LMDB)
+    os.RemoveAll(config.TRAIN_LMDB)
+    os.RemoveAll(config.VAL_LMDB)
 
     if !IsOnSolving() {
         return
@@ -85,20 +74,20 @@ func prepare() (err error) {
     if err = ConvertImageset("--resize_height=256",
                              "--resize_width=256",
                              "--shuffle",
-                             UPLOADPATH,
-                             TRAIN_FILE, TRAIN_LMDB); err != nil {
+                             config.UPLOADPATH,
+                             config.TRAIN_FILE, config.TRAIN_LMDB); err != nil {
         return
     }
 
     if err = ConvertImageset("--resize_height=256",
                              "--resize_width=256",
                              "--shuffle",
-                             UPLOADPATH,
-                             VAL_FILE, VAL_LMDB); err != nil {
+                             config.UPLOADPATH,
+                             config.VAL_FILE, config.VAL_LMDB); err != nil {
         return
     }
 
-    if err = ComputeImageMean(TRAIN_LMDB, MEAN_FILE); err != nil {
+    if err = ComputeImageMean(config.TRAIN_LMDB, config.MEAN_FILE); err != nil {
         return
     }
     return
@@ -127,7 +116,8 @@ func Solver() {
         return
     }
 
-    if err = Run("train", "--solver=" + SOLVER_FILE, "-log_dir=" + LOG_DIR); err != nil {
+    if err = Run("train", "--solver=" + config.SOLVER_FILE,
+                 "-log_dir=" + config.LOG_DIR); err != nil {
         log.Printf("Error: %s\n", err)
         return
     }

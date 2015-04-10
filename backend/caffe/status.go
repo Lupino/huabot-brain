@@ -5,6 +5,7 @@ import (
     "strings"
     "os/exec"
     "io/ioutil"
+    "github.com/Lupino/huabot-brain/config"
 )
 
 type Status struct {
@@ -20,15 +21,17 @@ func LastStatus() (status Status) {
     if IsOnSolving() {
         status.State = "Solving"
     }
-    if err = run(resoursesPath + "/last_status.sh", LOG_DIR + "/caffe.INFO", resoursesPath + "/status"); err != nil {
+    if err = run(config.RES + "/last_status.sh",
+                 config.LOG_DIR + "/caffe.INFO",
+                 config.RES + "/status"); err != nil {
       return
     }
 
 
     var tmp []byte
-    tmp, _ = ioutil.ReadFile(resoursesPath + "/status.acc.txt")
+    tmp, _ = ioutil.ReadFile(config.RES + "/status.acc.txt")
     status.Acc = strings.Trim(string(tmp), "\n ")
-    tmp, _ = ioutil.ReadFile(resoursesPath + "/status.loss.txt")
+    tmp, _ = ioutil.ReadFile(config.RES + "/status.loss.txt")
     status.Loss = strings.Trim(string(tmp), "\n ")
     if status.Acc == "" {
         status.Acc = "0"
