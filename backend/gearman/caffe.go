@@ -59,34 +59,6 @@ func submit(funcName string, workload []byte) ([]byte, error) {
     return result, errResult
 }
 
-func Train() (string, error) {
-    result, err := submit("CAFFE:TRAIN", nil)
-    if err != nil {
-        return "", err
-    }
-    return string(result), nil
-}
-
-func Stop() (string, error) {
-    result, err := submit("CAFFE:TRAIN:STOP", nil)
-    if err != nil {
-        return "", err
-    }
-    return string(result), nil
-}
-
-func Status() ([]byte, error) {
-    result, err := submit("CAFFE:TRAIN:STATUS", nil)
-    if err != nil {
-        return nil, err
-    }
-    return result, nil
-}
-
-func Plot(plotType string) ([]byte, error) {
-    return submit("CAFFE:TRAIN:PLOT", []byte(plotType))
-}
-
 func Predict(url string) (result PredictResult, err error) {
     var data []byte
     if data, err = submit("CAFFE:PREDICT:URL", []byte(url)); err != nil {

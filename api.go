@@ -5,6 +5,7 @@ import (
     "github.com/martini-contrib/render"
     "github.com/martini-contrib/binding"
     "github.com/Lupino/huabot-brain/backend"
+    "github.com/Lupino/huabot-brain/backend/caffe"
     "github.com/Lupino/huabot-brain/backend/gearman"
     "mime/multipart"
     "strconv"
@@ -303,34 +304,20 @@ func api(mart *martini.ClassicMartini) {
         r.JSON(http.StatusOK, map[string][]backend.Tag{"tags": tags})
     })
 
-    mart.Post(API + "/train/?", func(r render.Render) {
-        result, err := gearman.Train()
-        if err != nil {
-            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
-            return
-        }
-        r.JSON(http.StatusOK, map[string]string{"msg": result})
+    mart.Post(API + "/solve/?", func(r render.Render) {
+        caffe.Solve()
+        r.JSON(http.StatusOK, caffe.LastStatus())
         return
     })
 
-    mart.Get(API + "/train/?", func(r render.Render) {
-        result, err := gearman.Status()
-        if err != nil {
-            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
-            return
-        }
-        r.Header().Set(render.ContentType, render.ContentJSON)
-        r.Data(http.StatusOK, result)
+    mart.Get(API + "/solve/?", func(r render.Render) {
+        r.JSON(http.StatusOK, caffe.LastStatus())
         return
     })
 
-    mart.Delete(API + "/train/?", func(r render.Render) {
-        result, err := gearman.Stop()
-        if err != nil {
-            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
-            return
-        }
-        r.JSON(http.StatusOK, map[string]string{"msg": result})
+    mart.Delete(API + "/solve/?", func(r render.Render) {
+        caffe.StopSolve()
+        r.JSON(http.StatusOK, caffe.LastStatus())
         return
     })
 
@@ -353,7 +340,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/loss.png", func(r render.Render) {
-        result, err := gearman.Plot("loss")
+        result, err := caffe.Plot("loss")
         if err != nil {
             r.Redirect("/static/images/loading.png")
             return
@@ -363,7 +350,7 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Get(API + "/acc.png", func(r render.Render) {
-        result, err := gearman.Plot("acc")
+        result, err := caffe.Plot("acc")
         if err != nil {
             r.Redirect("/static/images/loading.png")
             return

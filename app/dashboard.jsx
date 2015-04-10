@@ -18,28 +18,23 @@ var Dashboard = React.createClass({
 
   loadStatus () {
     var self = this;
-    jQuery.get('/api/train', data => {
-      data.trainWorker = true;
+    jQuery.get('/api/solve', data => {
       self.setState(data);
-    }).fail(() => self.setState({trainWorker: false}));
+    });
   },
 
-  handleTrain () {
+  handleSolver () {
     var self = this;
-    jQuery.post('/api/train', data =>
-      self.setState({status: 'training', loss: 0, acc: 0})
-    ).fail(() =>
-      alert("Error: please make sure the train worker is started.")
+    jQuery.post('/api/solve', data =>
+      self.setState({status: 'Solving', loss: 0, acc: 0})
     );
   },
 
-  handleStopTrain () {
+  handleStopSolver () {
     var self = this;
-    if (confirm("Are you sure stop the training?")) {
-      jQuery.ajax({url: '/api/train', method: 'DELETE'}).done(() =>
-        self.setState({status: 'no train'})
-      ).fail(() =>
-        alert("Error: please make sure the train worker is started.")
+    if (confirm("Are you sure stop the Solving?")) {
+      jQuery.ajax({url: '/api/solve', method: 'DELETE'}).done(() =>
+        self.setState({status: 'Solved'})
       );
     }
   },
@@ -81,8 +76,8 @@ var Dashboard = React.createClass({
 
   getInitialState () {
     this.cache = this.cache || {};
-    return {tags: [], status: 'no train', acc: 0, loss: 0,
-            removeTag: false, updateTag: false, trainWorker: false,
+    return {tags: [], status: 'Solved', acc: 0, loss: 0,
+            removeTag: false, updateTag: false,
             has_more: false, lastTag: null};
   },
 
@@ -127,21 +122,14 @@ var Dashboard = React.createClass({
     }
   },
 
-  renderTrain () {
-    if (!this.state.trainWorker) {
-      return (
-        <Alert bsStyle="warning">
-          Please start train worker to enable train.
-        </Alert>
-      );
-    }
-    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleTrain}> Train </Button>;
-    if (this.state.status == "training") {
-      btn = <Button bsStyle="danger" bsSize="xsmall" onClick={this.handleStopTrain}> Stop </Button>
+  renderSolver () {
+    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleSolver}> Solve </Button>;
+    if (this.state.status == "Solving") {
+      btn = <Button bsStyle="danger" bsSize="xsmall" onClick={this.handleStopSolver}> Stop </Button>
     }
     return (
-      <div className="train">
-        <Panel header="Train status" bsStyle="info">
+      <div className="solver">
+        <Panel header="Solver status" bsStyle="info">
           <Row>
             <Col xs={6}>
               <img src="/api/loss.png" />
@@ -208,7 +196,7 @@ var Dashboard = React.createClass({
     });
     return (
       <div className="dashboard">
-        {this.renderTrain()}
+        {this.renderSolver()}
         <h2 className="sub-header">Tags</h2>
         <Table striped bordered condensed hover onClick={this.handleClickTag}>
           <thead>
