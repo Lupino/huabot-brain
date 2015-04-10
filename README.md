@@ -11,7 +11,6 @@ Please make sure install the requirements.
 ### install
 
     go get -v github.com/Lupino/huabot-brain
-    go get -v github.com/Lupino/huabot-brain/tools/train_worker
 
 ### start server
 
@@ -19,7 +18,6 @@ Please make sure install the requirements.
     make deps
     make # precompile and package javascript
     huabot-brain --gearmand=127.0.0.1:4730 --dbpath=dataset.db
-    train_worker --gearmand=127.0.0.1:4730
 
     env GEARMAND_PORT=tcp://127.0.0.1:4730 python tools/predict_worker/main.py resources
 
@@ -32,7 +30,7 @@ Please make sure install the requirements.
 
 Go to <http://127.0.0.1:3000>
 
-Just click Train button to train the network.
+Just click Solve button to solve the network.
 
 ### learn more
 
