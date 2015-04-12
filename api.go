@@ -21,7 +21,8 @@ type FileForm struct {
 }
 
 type PredictForm struct {
-    ImgUrl string `form:"img_url" binding:"required"`
+    ImgUrl string `form:"img_url"`
+    File *multipart.FileHeader `form:"file"`
 }
 
 type TagForm struct {
@@ -363,7 +364,17 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Post(API + "/predict/?", binding.Bind(PredictForm{}), func(form PredictForm, r render.Render) {
-        result, err := caffe.PredictUrl(form.ImgUrl)
+        var err error
+        var result caffe.PredictResult
+        if len(form.ImgUrl) > 0 {
+            result, err = caffe.PredictUrl(form.ImgUrl)
+        } else {
+            var source multipart.File
+            if source, err = form.File.Open(); err == nil {
+                defer source.Close()
+                result, err = caffe.Predict(source)
+            }
+        }
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
