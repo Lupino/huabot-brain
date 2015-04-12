@@ -11,6 +11,8 @@ var (
     SOLVER_FILE string
     LOG_DIR string
     PLOT_ROOT string
+    CAFFEMODEL_PATH string
+    CAFFEMODEL_NAME string
     PREDICT_HOST string
     PREDICT string
 )
@@ -31,6 +33,8 @@ func SetResource(source string) {
     SOLVER_FILE = RES + "/solver.prototxt"
     LOG_DIR = RES + "/logs"
     PLOT_ROOT = RES + "/plot"
+    CAFFEMODEL_PATH = RES + "/models"
+    CAFFEMODEL_NAME = CAFFEMODEL_PATH + "/huabot-brain.caffemodel"
     PREDICT = RES + "/predict/main.py"
 }
 

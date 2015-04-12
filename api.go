@@ -32,6 +32,10 @@ type DataTypeForm struct {
     DataType uint              `form:"data_type"`
 }
 
+type ModelForm struct {
+    ModelName string `form:"model" binding:"required"`
+}
+
 func (dt DataTypeForm) Validate(errors binding.Errors, req *http.Request) (binding.Errors) {
     if dt.DataType > 2 {
         errors = append(errors, binding.Error{
@@ -380,6 +384,46 @@ func api(mart *martini.ClassicMartini) {
         defer resp.Body.Close()
         data, _ := ioutil.ReadAll(resp.Body)
         r.Data(http.StatusOK, data)
+        return
+    })
+
+    mart.Get(API + "/models", func(r render.Render) {
+        modelNames, err := caffe.ListModels()
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string][]string{"models": modelNames})
+        return
+    })
+
+    mart.Get(API + "/models/current", func(r render.Render) {
+        modelName, err := caffe.GetCurrentModel()
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string]string{"model": modelName})
+        return
+    })
+
+    mart.Post(API + "/models/apply", binding.Bind(ModelForm{}), func(model ModelForm, r render.Render) {
+        err := caffe.ApplyModel(model.ModelName)
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string]string{})
+        return
+    })
+
+    mart.Delete(API + "/models/(?P<modelName>[^/]+.caffemodel)", func(params martini.Params, r render.Render) {
+        err := caffe.RemoveModel(params["modelName"])
+        if err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string]string{})
         return
     })
 }
