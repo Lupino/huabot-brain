@@ -1,7 +1,10 @@
 package caffe
 
 import (
+    "os"
+    "fmt"
     "bytes"
+    "os/exec"
     "net/url"
     "net/http"
     "encoding/json"
@@ -20,6 +23,8 @@ type PredictResult struct {
     Time  float64          `json:"time,omitempty"`
     Error string           `json:"err,omitempty"`
 }
+
+var predictCmd *exec.Cmd
 
 func PredictUrl(imgUrl string) (result PredictResult, err error) {
     resp, err := http.PostForm(config.PREDICT_HOST + "/api/predict/url",
@@ -41,4 +46,21 @@ func PredictUrl(imgUrl string) (result PredictResult, err error) {
         result.BetResult[i].Tag = ptag.Tag
     }
     return
+}
+
+func StartPredict() (error) {
+    if predictCmd != nil && !predictCmd.ProcessState.Exited() {
+        return fmt.Errorf("Predict is alreadly running.")
+    }
+    predictCmd = exec.Command(config.PREDICT, "--host", config.PREDICT_HOST)
+    predictCmd.Stdout = os.Stdout
+    predictCmd.Stderr = os.Stderr
+    return predictCmd.Start()
+}
+
+func StopPredict() (error) {
+    if predictCmd != nil && predictCmd.Process != nil {
+        return predictCmd.Process.Kill()
+    }
+    return nil
 }

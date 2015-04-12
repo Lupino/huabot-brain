@@ -372,6 +372,24 @@ func api(mart *martini.ClassicMartini) {
         return
     })
 
+    mart.Post(API + "/predict/process/?", func(r render.Render) {
+        if err := caffe.StartPredict(); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string]string{})
+        return
+    })
+
+    mart.Delete(API + "/predict/process/?", func(r render.Render) {
+        if err := caffe.StopPredict(); err != nil {
+            r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
+            return
+        }
+        r.JSON(http.StatusOK, map[string]string{})
+        return
+    })
+
     mart.Get(API + "/proxy/?", func(req *http.Request, r render.Render) {
         var qs = req.URL.Query()
         var url = qs.Get("url")
