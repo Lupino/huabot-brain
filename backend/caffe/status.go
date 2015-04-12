@@ -1,9 +1,7 @@
 package caffe
 
 import (
-    "os"
     "strings"
-    "os/exec"
     "io/ioutil"
     "github.com/Lupino/huabot-brain/config"
 )
@@ -40,11 +38,4 @@ func LastStatus() (status Status) {
         status.Loss = "0"
     }
     return
-}
-
-func run(cmdName string, args... string) (error) {
-    cmd := exec.Command(cmdName, args...)
-    cmd.Stdout = os.Stdout
-    cmd.Stderr = os.Stderr
-    return cmd.Run()
 }
