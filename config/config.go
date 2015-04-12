@@ -11,6 +11,8 @@ const (
     SOLVER_FILE = RES + "/solver.prototxt"
     LOG_DIR = RES + "/logs"
     PLOT_ROOT = RES + "/plot"
+    PREDICT_HOST = "http://127.0.0.1:3001"
+    PREDICT = RES + "/predict/main.py"
 )
 
 var FILE_EXTS = map[string]string{

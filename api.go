@@ -6,7 +6,6 @@ import (
     "github.com/martini-contrib/binding"
     "github.com/Lupino/huabot-brain/backend"
     "github.com/Lupino/huabot-brain/backend/caffe"
-    "github.com/Lupino/huabot-brain/backend/gearman"
     "mime/multipart"
     "strconv"
     "net/http"
@@ -360,12 +359,11 @@ func api(mart *martini.ClassicMartini) {
     })
 
     mart.Post(API + "/predict/?", binding.Bind(PredictForm{}), func(form PredictForm, r render.Render) {
-        result, err := gearman.Predict(form.ImgUrl)
+        result, err := caffe.PredictUrl(form.ImgUrl)
         if err != nil {
             r.JSON(http.StatusInternalServerError, map[string]string{"err": err.Error()})
             return
         }
-        r.Header().Set(render.ContentType, render.ContentJSON)
         r.JSON(http.StatusOK, result)
         return
     })

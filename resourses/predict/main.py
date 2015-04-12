@@ -1,13 +1,16 @@
+#!/usr/bin/env python
+
 import os
 import time
 import numpy as np
 import caffe
-import gear
 import cStringIO as StringIO
 import json
 import urllib2
+from urlparse import urlparse
 from caffe.io import resize_image
 import logging
+from bottle import request, response, Bottle, run
 # logging.basicConfig(level=logging.DEBUG)
 
 caffe.set_mode_cpu()
@@ -59,62 +62,40 @@ class Classifier(object):
             return (False, 'Something went wrong when classifying the '
                           'image. Maybe try another one?')
 
-class Brain(object):
-    def __init__(self, resoursesPath):
-        self._clf = Classifier(resoursesPath)
-        self._funcs = {}
-        self._worker = gear.Worker('huaban-brain')
+clf = Classifier('resourses')
 
-    def _add_func(self, func_name, callback):
-        self._worker.registerFunction(func_name)
-        self._funcs[func_name] = callback
+app = Bottle()
 
-    def add_server(self, host='localhost', port=4730):
-        self._worker.addServer(host, port)
+@app.post("/api/predict/url")
+def predict_url():
+    response.set_header('content-type', 'application/json')
+    img_url = request.forms.img_url.strip()
+    if not img_url:
+        return json.dumps({"err": "img_url is required."})
+    rsp = urllib2.urlopen(url, timeout=10)
+    data = rsp.read()
+    image = caffe.io.load_image(StringIO.StringIO(data))
+    result = clf.classify_image(image)
+    if result[0]:
+        result = {'bet_result': result[1], 'time': result[2]}
+    else:
+        result = {'err': result[1]}
 
-    def process(self):
-        self._add_func('CAFFE:PREDICT', self.classify_image)
-        self._add_func('CAFFE:PREDICT:URL', self.classify_image_url)
-        while 1:
-            job = self._worker.getJob()
-            func = self._funcs.get(job.name)
-            if func:
-                try:
-                    func(job)
-                except Exception as e:
-                    job.sendWorkComplete(json.dumps({'err': str(e)}))
-                    print('process %s error: %s'%(job.name, e))
+    return json.dumps(result)
 
-    def classify_image(self, job):
-        self._classify_image(job, job.arguments)
+def main(script, arg1, val1):
+    if arg1 == '--host':
+        host = urlparse(val1).netloc
+    else:
+        host = "127.0.0.1:3001"
 
-    def classify_image_url(self, job):
-        url = job.arguments
+    host = host.split(":")
+    host = host[0]
+    port = "80"
+    if len(host) == 2:
+        port = host[1]
 
-        rsp = urllib2.urlopen(url, timeout=10)
-        data = rsp.read()
-        self._classify_image(job, data)
-
-    def _classify_image(self, job, data):
-        image = caffe.io.load_image(StringIO.StringIO(data))
-        result = self._clf.classify_image(image)
-        if result[0]:
-            result = {'bet_result': result[1], 'time': result[2]}
-        else:
-            result = {'err': result[1]}
-        print(result)
-        job.sendWorkComplete(json.dumps(result))
-
-
-def main(scripts, resoursesPath='resourses'):
-    GEARMAND_PORT = os.environ.get('GEARMAND_PORT',
-                               'tcp://127.0.0.1:4730')[6:].split(':')
-
-    brain = Brain(resoursesPath)
-    brain.add_server(GEARMAND_PORT[0], int(GEARMAND_PORT[1]))
-
-    print("brain process")
-    brain.process()
+    run(app, host=host, port=port)
 
 if __name__ == "__main__":
     import sys
