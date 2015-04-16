@@ -10,6 +10,8 @@ type Status struct {
     State string `json:"status"`
     Loss  string `json:"loss"`
     Acc   string `json:"acc"`
+    Model string `json:"model"`
+    PredictStatus string `json:"predictStatus"`
 }
 
 func LastStatus() (status Status) {
@@ -25,6 +27,13 @@ func LastStatus() (status Status) {
       return
     }
 
+    status.Model, _ = GetCurrentModel()
+
+    if IsPredictAlive() {
+        status.PredictStatus = "Started"
+    } else {
+        status.PredictStatus = "Stoped"
+    }
 
     var tmp []byte
     tmp, _ = ioutil.ReadFile(config.RES + "/status.acc.txt")

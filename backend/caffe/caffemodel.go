@@ -17,7 +17,8 @@ func ListModels() (modelNames []string, err error) {
 }
 
 func ApplyModel(modelName string) (error) {
-    return os.Link(filepath.Join(config.CAFFEMODEL_PATH, modelName), config.CAFFEMODEL_NAME)
+    os.Remove(config.CAFFEMODEL_NAME)
+    return os.Symlink(filepath.Join(config.CAFFEMODEL_PATH, modelName), config.CAFFEMODEL_NAME)
 }
 
 func RemoveModel(modelName string) (error) {

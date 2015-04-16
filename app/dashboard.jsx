@@ -3,6 +3,8 @@ var Dashboard = React.createClass({
     router: React.PropTypes.func.isRequired
   },
 
+  mixins: [OverlayMixin],
+
   loadTags () {
     var self = this;
     var query = this.context.router.getCurrentQuery();
@@ -37,6 +39,20 @@ var Dashboard = React.createClass({
         self.setState({status: 'Solved'})
       );
     }
+  },
+
+  handleStartPredict () {
+    var self = this;
+    jQuery.post('/api/predict/process', data =>
+      self.setState({predictStatus: 'Started'})
+    );
+  },
+
+  handleStopPredict () {
+    var self = this;
+    jQuery.ajax({url: '/api/predict/process', method: 'DELETE'}).done(data =>
+      self.setState({predictStatus: 'Stoped'})
+    );
   },
 
   handleClickTag (evt) {
@@ -78,7 +94,8 @@ var Dashboard = React.createClass({
     this.cache = this.cache || {};
     return {tags: [], status: 'Solved', acc: 0, loss: 0,
             removeTag: false, updateTag: false,
-            has_more: false, lastTag: null};
+            has_more: false, lastTag: null, isModalOpen: false,
+            predictStatus: 'Stoped', model: 'huabot-brain.caffemodel'};
   },
 
   shouldLoadTags () {
@@ -155,6 +172,46 @@ var Dashboard = React.createClass({
     );
   },
 
+  renderPredict () {
+    var btn = <Button bsStyle="primary" bsSize="xsmall" onClick={this.handleStartPredict}> Start </Button>;
+    if (this.state.predictStatus == "Started") {
+      btn = <Button bsStyle="warning" bsSize="xsmall" onClick={this.handleStopPredict}> Stop </Button>
+    }
+    return (
+      <div className="predict">
+        <Panel header="Predict status" bsStyle="info">
+          <Row>
+            <Col xs={6} md={4}>
+              <Row>
+                <Col xs={12} md={8}>
+                  Current: {this.state.model}
+                </Col>
+                <Col xs={6} md={4}>
+                  <Button bsStyle="default" bsSize="xsmall" onClick={() => this.setState({isModalOpen: true})}> Change </Button>
+                </Col>
+              </Row>
+            </Col>
+            <Col xs={6} md={4}></Col>
+            <Col xs={6} md={4}>
+              <Row>
+                <Col xs={12} md={8}> Status: {this.state.predictStatus} </Col>
+                <Col xs={6} md={4}> {btn} </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Panel>
+      </div>
+    );
+  },
+
+  renderOverlay () {
+    if (!this.state.isModalOpen) {
+      return <span />;
+    }
+
+    return <CaffeModel onRequestHide={() => this.setState({isModalOpen: !this.state.isModalOpen})} />;
+  },
+
   render () {
     var tags = this.state.tags || [];
     var loadMore;
@@ -197,6 +254,7 @@ var Dashboard = React.createClass({
     return (
       <div className="dashboard">
         {this.renderSolver()}
+        {this.renderPredict()}
         <h2 className="sub-header">Tags</h2>
         <Table striped bordered condensed hover onClick={this.handleClickTag}>
           <thead>
@@ -215,5 +273,53 @@ var Dashboard = React.createClass({
         {loadMore}
       </div>
     );
+  }
+});
+
+var CaffeModel = React.createClass({
+
+  getInitialState () {
+    return {
+      models: []
+    };
+  },
+
+  componentDidMount  () {
+    this.loadModelNames();
+  },
+
+  loadModelNames () {
+    jQuery.get('/api/models', data => this.setState(data));
+  },
+
+  handleToggle () {
+    this.props.onRequestHide();
+  },
+
+  handleApply () {
+    var self = this;
+    var modelName = this.refs.modelName.getValue();
+    jQuery.post('/api/models/apply', {model: modelName}, () => {
+      alert('Success!');
+      window.location.reload();
+    });
+  },
+
+  render () {
+    var modelNames = this.state.models.map(model => <option value={model}> {model} </option>);
+    return (
+        <Modal bsStyle="info" title="Change Model" onRequestHide={this.handleToggle}>
+          <div className="modal-body">
+            <Input type='select' label='Model name' ref="modelName"
+                placeholder='huabot-brain.caffemodel'>
+              {modelNames}
+            </Input>
+          </div>
+          <div className="modal-footer">
+            <Button onClick={this.handleToggle}> Cancel </Button>
+            <Button onClick={this.handleApply}> OK </Button>
+          </div>
+        </Modal>
+      );
   }
 });

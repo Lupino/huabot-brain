@@ -90,13 +90,20 @@ func PredictUrl(imgUrl string) (result PredictResult, err error) {
 }
 
 func StartPredict() (error) {
-    if predictCmd != nil && !predictCmd.ProcessState.Exited() {
+    if IsPredictAlive() {
         return fmt.Errorf("Predict is alreadly running.")
     }
     predictCmd = exec.Command(config.PREDICT, "--host", config.PREDICT_HOST)
     predictCmd.Stdout = os.Stdout
     predictCmd.Stderr = os.Stderr
     return predictCmd.Start()
+}
+
+func IsPredictAlive() bool {
+    if predictCmd != nil && predictCmd.ProcessState != nil && !predictCmd.ProcessState.Exited() {
+        return true
+    }
+    return false
 }
 
 func StopPredict() (error) {
