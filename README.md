@@ -17,9 +17,7 @@ Please make sure install the requirements.
     cd $GOPATH/src/github.com/Lupino/huabot-brain
     make deps
     make # precompile and package javascript
-    huabot-brain --gearmand=127.0.0.1:4730 --dbpath=dataset.db
-
-    env GEARMAND_PORT=tcp://127.0.0.1:4730 python tools/predict_worker/main.py resources
+    huabot-brain
 
 ### load datasets
 
