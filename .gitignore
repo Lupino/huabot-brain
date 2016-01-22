@@ -3,6 +3,7 @@ public/upload/*
 *.caffemodel
 *.solverstate
 *.txt
+!LICENSE.txt
 *.db
 *_lmdb
 *.binaryproto
